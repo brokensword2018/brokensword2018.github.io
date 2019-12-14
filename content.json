@@ -1,1 +1,1 @@
-[{"title":"我的第一篇文章","date":"2019-12-08T08:20:03.000Z","path":"2019/12/08/我的第一篇文章/","tags":[]},{"title":"Hello World","date":"2019-12-08T08:15:58.014Z","path":"2019/12/08/hello-world/","tags":[]}]
+[{"title":"我的第一篇文章","date":"2019-12-08T08:20:03.000Z","path":"2019/12/08/我的第一篇文章/","tags":[{"name":"test","slug":"test","permalink":"http://yoursite.com/tags/test/"}]},{"title":"Hello World","date":"2019-12-08T08:15:58.014Z","path":"2019/12/08/hello-world/","tags":[]}]
