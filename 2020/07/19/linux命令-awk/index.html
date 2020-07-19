@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="C++,Boost," />
+  <meta name="keywords" content="linux," />
 
 
 
@@ -79,15 +79,15 @@
 
 
 
-<meta name="description" content="简介Barton-Nackman技巧是通过传递自己本身作为模板参数, 在模板中实现一些依赖于派生类的方法,从而减少了派生类的代码量">
-<meta name="keywords" content="C++,Boost">
+<meta name="description" content="简介Aho，Peter  Weinberger&#96;&#96;&#96;, 和 &#96;&#96;&#96;Brian Kernighan&#96;&#96;&#96; 的 &#96;&#96;&#96;Family Name &#96;&#96;&#96;的首字符。12### 基本语法3&amp;#96;&amp;#96;&amp;#96; akw [options] &amp;#39;awk programa&amp;#39; inputfile&amp;#96;&amp;#96;&amp;#96;  4或  5&amp;#96;&amp;#96;&amp;#96; akw [options">
+<meta name="keywords" content="linux">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Barton-Nackman 技巧">
-<meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2019&#x2F;12&#x2F;24&#x2F;Barton-Nackman-%E6%8A%80%E5%B7%A7&#x2F;index.html">
+<meta property="og:title" content="linux命令_awk">
+<meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2020&#x2F;07&#x2F;19&#x2F;linux%E5%91%BD%E4%BB%A4-awk&#x2F;index.html">
 <meta property="og:site_name" content="brokensword个人博客">
-<meta property="og:description" content="简介Barton-Nackman技巧是通过传递自己本身作为模板参数, 在模板中实现一些依赖于派生类的方法,从而减少了派生类的代码量">
+<meta property="og:description" content="简介Aho，Peter  Weinberger&#96;&#96;&#96;, 和 &#96;&#96;&#96;Brian Kernighan&#96;&#96;&#96; 的 &#96;&#96;&#96;Family Name &#96;&#96;&#96;的首字符。12### 基本语法3&amp;#96;&amp;#96;&amp;#96; akw [options] &amp;#39;awk programa&amp;#39; inputfile&amp;#96;&amp;#96;&amp;#96;  4或  5&amp;#96;&amp;#96;&amp;#96; akw [options">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-12-24T12:00:58.267Z">
+<meta property="og:updated_time" content="2020-07-19T08:19:19.154Z">
 <meta name="twitter:card" content="summary">
 
 
@@ -118,13 +118,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2019/12/24/Barton-Nackman-技巧/"/>
+  <link rel="canonical" href="http://yoursite.com/2020/07/19/linux命令-awk/"/>
 
 
 
 
 
-  <title>Barton-Nackman 技巧 | brokensword个人博客</title>
+  <title>linux命令_awk | brokensword个人博客</title>
   
 
 
@@ -251,7 +251,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/24/Barton-Nackman-%E6%8A%80%E5%B7%A7/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/19/linux%E5%91%BD%E4%BB%A4-awk/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="brokensword">
@@ -268,7 +268,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Barton-Nackman 技巧</h1>
+          <h1 class="post-title" itemprop="name headline">linux命令_awk</h1>
         
 
         <div class="post-meta">
@@ -280,8 +280,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-24T18:37:47+08:00">
-                2019-12-24
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-07-19T15:52:28+08:00">
+                2020-07-19
               </time>
             
 
@@ -303,8 +303,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C-%E8%AF%AD%E8%A8%80/" itemprop="url" rel="index">
-                    <span itemprop="name">C++语言</span>
+                  <a href="/categories/linux%E5%91%BD%E4%BB%A4/" itemprop="url" rel="index">
+                    <span itemprop="name">linux命令</span>
                   </a>
                 </span>
 
@@ -340,15 +340,10 @@
       
 
       
-        <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p><code>Barton-Nackman</code>技巧是通过传递自己本身作为模板参数, 在模板中实现一些依赖于派生类的方法,从而减少了派生类的代码量</p>
-<a id="more"></a>
-
-<h3 id="代码示意"><a href="#代码示意" class="headerlink" title="代码示意"></a>代码示意</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> Derived&gt; <span class="class"><span class="keyword">class</span> <span class="title">less_than</span>&#123;</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span>:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    <span class="comment">//通过小于符号定义其他符号,例如大于,大于等于等</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">friend</span> <span class="keyword">bool</span> <span class="keyword">operator</span> &gt;(<span class="keyword">const</span> Derived&amp; lhs, <span class="keyword">const</span> Derived&amp; rhs)&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">        <span class="keyword">return</span> rhs &lt; lhs;    </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">friend</span> <span class="keyword">bool</span> <span class="keyword">operator</span> &gt;=(<span class="keyword">const</span> Derived&amp; lhs, <span class="keyword">const</span> Derived&amp; rhs)&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">        <span class="keyword">return</span> !(lhs &lt; rhs);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">    </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">&#125;;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line"><span class="comment">//这个类需要自己定义小于符号,然后通过继承less_than,可以自动生成大于符号</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SomeClass</span> :</span> <span class="keyword">public</span> less_than&lt;SomeClass&gt;&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span>:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">int</span> value_;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">    SomeClass(<span class="keyword">int</span> value) : value_(value) &#123; &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">friend</span> <span class="keyword">bool</span> <span class="keyword">operator</span> &lt;(<span class="keyword">const</span> SomeClass&amp; lhs, <span class="keyword">const</span> SomeClass&amp; rhs)&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">        <span class="keyword">return</span> lhs.value_ &lt; rhs.value_;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">    &#125;  </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">&#125;;</span></pre></td></tr></table></figure>
-<p>测试代码:</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="function">SomeClass <span class="title">a</span><span class="params">(<span class="number">1</span>)</span></span>;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="function">SomeClass <span class="title">b</span><span class="params">(<span class="number">2</span>)</span></span>;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">(a &lt; b);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">(a &gt; b); <span class="comment">//work well</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">(a &gt;= b); <span class="comment">//work well</span></span></pre></td></tr></table></figure>
-
-<h3 id="如何使用"><a href="#如何使用" class="headerlink" title="如何使用"></a>如何使用</h3><p><code>boost/operators.hpp</code>中提供了很多这样的模板类,包含该头文件,然后自己类继承即可.</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">less_than_comparable : 派生类提供小于,自动生成 &gt; , &gt;= , &lt;=</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">equality_comparable : 派生类提供等于, 自动生成 !=</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"> class MyOwnClass : <span class="keyword">public</span> less_than_comparable&lt;MyOwnClass&gt;&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">public</span>:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">        <span class="comment">//实现小于符号,该类会自动生成 &lt;=, &gt;, &gt;=</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">        <span class="keyword">friend</span> <span class="keyword">bool</span> <span class="keyword">operator</span> &lt;(<span class="keyword">const</span> SomeClass&amp; lhs, <span class="keyword">const</span> SomeClass&amp; rhs);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line"> &#125;;</span></pre></td></tr></table></figure>
+        <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><figure class="highlight plain"><figcaption><span>Aho，Peter  Weinberger```, 和 ```Brian Kernighan``` 的 ```Family Name ```的首字符。</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">### 基本语法</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">&#96;&#96;&#96; akw [options] &#39;awk programa&#39; inputfile&#96;&#96;&#96;  </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">或  </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">&#96;&#96;&#96; akw [options] -f &#39;awk programa file&#39; inputfile&#96;&#96;&#96;    </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">&#96;&#96;&#96;awk programa&#96;&#96;&#96;是指&#96;&#96;&#96;awk&#96;&#96;&#96;的命令,构成为  </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">&#96;&#96;&#96;pattern &#123;action&#125;&#96;&#96;&#96;,&#96;&#96;&#96;pattern&#96;&#96;&#96;是正则表达式使用&#96;&#96;&#96;&#x2F;&#96;&#96;&#96;包裹起来,如&#96;&#96;&#96;&#x2F;regular-expression&#x2F;&#96;&#96;&#96;,然后以行为单位对满足条件的行执行&#96;&#96;&#96;action&#96;&#96;&#96;操作.</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">### 常用&#96;&#96;&#96;option</span></pre></td></tr></table></figure>
+<figure class="highlight plain"><figcaption><span>;```awk```将文本的一行以分隔符分割成多个域```$0```指整行,```$1,$2...```分别指第二列,第三列等.</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">### 例子</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">假设文件&#96;&#96;&#96;mail-list&#96;&#96;&#96;内容为</span></pre></td></tr></table></figure>
+<p>Amelia       555-5553     <a href="mailto:amelia.zodiacusque@gmail.com" target="_blank" rel="noopener">amelia.zodiacusque@gmail.com</a>    F<br>Broderick    555-0542     <a href="mailto:broderick.aliquotiens@yahoo.com" target="_blank" rel="noopener">broderick.aliquotiens@yahoo.com</a> R<br>Julie        555-6699     <a href="mailto:julie.perscrutabor@skeeve.com" target="_blank" rel="noopener">julie.perscrutabor@skeeve.com</a>   F<br>Samuel       555-3430     <a href="mailto:samuel.lanceolis@shu.edu" target="_blank" rel="noopener">samuel.lanceolis@shu.edu</a>        A</p>
+<pre><code>```awk &apos;/Julie/ {print $1,$3}&apos; mail-list```命令就是匹配存在```Julie```的行,然后打印出该行的第一列和第三列,注意要在```$1```和```$1```之间添加逗号,不然第一列和第三列会连在一起.</code></pre>
       
     </div>
     
@@ -365,9 +360,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/C/" rel="tag"># C++</a>
-          
-            <a href="/tags/Boost/" rel="tag"># Boost</a>
+            <a href="/tags/linux/" rel="tag"># linux</a>
           
         </div>
       
@@ -380,15 +373,15 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/2019/12/24/Barton-Nackman-%E6%8A%80%E5%B7%A7/" rel="next" title="Barton-Nackman 技巧">
+                <i class="fa fa-chevron-left"></i> Barton-Nackman 技巧
+              </a>
+            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2020/07/19/linux%E5%91%BD%E4%BB%A4-awk/" rel="prev" title="linux命令_awk">
-                linux命令_awk <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -534,7 +527,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码示意"><span class="nav-number">2.</span> <span class="nav-text">代码示意</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何使用"><span class="nav-number">3.</span> <span class="nav-text">如何使用</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li></ol></div>
             
 
           </div>
