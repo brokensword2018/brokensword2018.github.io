@@ -23,7 +23,7 @@ categories: linux命令
 `-F`:指定文件的分隔符,默认为空格或者`tab` ;`awk`将文本的一行以分隔符分割成多个域`$0`指整行,`$1,$2...`分别指第二列,第三列等.  
 
 ### 例子
-假设文件`mail-list`内容为  
+假设文件`mail-list`内容为 ： 
 ```
 Amelia       555-5553     amelia.zodiacusque@gmail.com    F
 Broderick    555-0542     broderick.aliquotiens@yahoo.com R
