@@ -88,7 +88,8 @@
 <meta property="og:description" content="前序一个监控系统由哪些东西构成？  数据源，数据可以是rpc调用成功率、机器负载等等 数据收集服务器 数据使用，包括数据可视化和告警等">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2020&#x2F;07&#x2F;29&#x2F;%E6%99%AE%E7%BD%97%E7%B1%B3%E4%BF%AE%E6%96%AF%E4%B9%8B%E5%85%A5%E9%97%A8&#x2F;%E7%9B%91%E6%8E%A7%E7%B3%BB%E7%BB%9F%E7%BB%93%E6%9E%84.jpg">
-<meta property="og:updated_time" content="2020-07-29T16:18:54.041Z">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2020&#x2F;07&#x2F;29&#x2F;%E6%99%AE%E7%BD%97%E7%B1%B3%E4%BF%AE%E6%96%AF%E4%B9%8B%E5%85%A5%E9%97%A8&#x2F;%E6%99%AE%E7%BD%97%E7%B1%B3%E4%BF%AE%E6%96%AF%E6%9E%B6%E6%9E%84.jpg">
+<meta property="og:updated_time" content="2020-07-30T16:13:11.726Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2020&#x2F;07&#x2F;29&#x2F;%E6%99%AE%E7%BD%97%E7%B1%B3%E4%BF%AE%E6%96%AF%E4%B9%8B%E5%85%A5%E9%97%A8&#x2F;%E7%9B%91%E6%8E%A7%E7%B3%BB%E7%BB%9F%E7%BB%93%E6%9E%84.jpg">
 
@@ -353,8 +354,19 @@
 <p>监控系统构成如下：  </p>
 <img src="/2020/07/29/%E6%99%AE%E7%BD%97%E7%B1%B3%E4%BF%AE%E6%96%AF%E4%B9%8B%E5%85%A5%E9%97%A8/%E7%9B%91%E6%8E%A7%E7%B3%BB%E7%BB%9F%E7%BB%93%E6%9E%84.jpg" class="" title="监控系统结构">  
 
-<p>本文将从监控系统的构成数据源、数据收集和数据使用三方面介绍Promethus  </p>
-<h2 id="数据源"><a href="#数据源" class="headerlink" title="数据源"></a>数据源</h2><h2 id="数据收集"><a href="#数据收集" class="headerlink" title="数据收集"></a>数据收集</h2><h2 id="数据使用"><a href="#数据使用" class="headerlink" title="数据使用"></a>数据使用</h2><h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://prometheus.io/docs/introduction/overview/" target="_blank" rel="noopener">Prometheus官方文档</a></p>
+<p>本文将从监控系统的构成数据源、数据收集和数据使用三方面介绍Promethus，Promethus的架构如下：  </p>
+<img src="/2020/07/29/%E6%99%AE%E7%BD%97%E7%B1%B3%E4%BF%AE%E6%96%AF%E4%B9%8B%E5%85%A5%E9%97%A8/%E6%99%AE%E7%BD%97%E7%B1%B3%E4%BF%AE%E6%96%AF%E6%9E%B6%E6%9E%84.jpg" class="" title="普罗米修斯架构">  
+
+
+<h2 id="数据源"><a href="#数据源" class="headerlink" title="数据源"></a>数据源</h2><p>Promethus主要有两种数据源，分别为使用<code>client libraries</code>的方式和<code>exporter</code>的方式。  </p>
+<h3 id="使用client-libraries"><a href="#使用client-libraries" class="headerlink" title="使用client libraries"></a>使用<code>client libraries</code></h3><p>使用<code>client libraries</code>将会把应用程序需要监控的数据以<code>http</code>接口的形式暴露给数据收集服务器。<br>Promethus官方提供了， <code>Go, java, scala, Python, Ruby</code>语言的库，其他语言，如<code>c++, c, R</code>等有第三方的库。<br><strong>特别的</strong>当你的进程是个短命鬼时（23333），Promethus提供了一个叫做<code>Pushgateway</code>的工具，你可以把数据推送到该处，Promethus也可以到该处收集数据。  </p>
+<h3 id="使用exporter"><a href="#使用exporter" class="headerlink" title="使用exporter"></a>使用<code>exporter</code></h3><p>使用<code>exporter</code>可以将第三方系统中一些现有指标进行导出。<br>例如数据库相关的</p>
+<ul>
+<li>ClickHouse exporter</li>
+<li>MySQL server exporter</li>
+<li>Redis exporter<br>通过这些<code>exporter</code>便可以很方便的监控我们所使用的数据库的负载、连接情况等。  </li>
+</ul>
+<h2 id="数据收集"><a href="#数据收集" class="headerlink" title="数据收集"></a>数据收集</h2><h2 id="数据使用"><a href="#数据使用" class="headerlink" title="数据使用"></a>数据使用</h2><h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://prometheus.io/docs/introduction/overview/" target="_blank" rel="noopener">Prometheus官方文档</a></p>
 
       
     </div>
@@ -539,7 +551,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前序"><span class="nav-number">1.</span> <span class="nav-text">前序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据源"><span class="nav-number">2.</span> <span class="nav-text">数据源</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据收集"><span class="nav-number">3.</span> <span class="nav-text">数据收集</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据使用"><span class="nav-number">4.</span> <span class="nav-text">数据使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考文档"><span class="nav-number">5.</span> <span class="nav-text">参考文档</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前序"><span class="nav-number">1.</span> <span class="nav-text">前序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据源"><span class="nav-number">2.</span> <span class="nav-text">数据源</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用client-libraries"><span class="nav-number">2.1.</span> <span class="nav-text">使用client libraries</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用exporter"><span class="nav-number">2.2.</span> <span class="nav-text">使用exporter</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据收集"><span class="nav-number">3.</span> <span class="nav-text">数据收集</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据使用"><span class="nav-number">4.</span> <span class="nav-text">数据使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考文档"><span class="nav-number">5.</span> <span class="nav-text">参考文档</span></a></li></ol></div>
             
 
           </div>
