@@ -489,7 +489,7 @@ pre,
   font-size: 13px;
   color: #4d4d4c;
   background: #f7f7f7;
-  line-height: 1.3;
+  line-height: 0;
 }
 pre,
 code {
@@ -1823,7 +1823,7 @@ pre .javascript .function {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #fff2ff;
+  background: #a777ff;
 }
 .links-of-blogroll {
   font-size: 13px;
@@ -3128,8 +3128,4 @@ pre .javascript .function {
 .post-body a:not(.btn):hover {
   color: #0593d3;
   text-decoration: underline;
-}
-code {
-  margin: 0px 3px;
-  border: 1px solid #999;
 }
