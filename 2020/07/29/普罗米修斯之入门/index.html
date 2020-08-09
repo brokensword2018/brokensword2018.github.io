@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="前序本文从整体上对Prometheus进行介绍，不设计使用细节。一个监控系统由哪些东西构成？  数据源，数据可以是rpc调用成功率、机器负载等等 数据收集服务器 数据使用，包括数据可视化和告警等">
+<meta name="description" content="前序本文从整体上对Prometheus进行介绍，不涉及使用细节。一个监控系统由哪些部分构成？  数据源，数据可以是rpc调用成功率、机器负载等 数据收集服务器 数据使用，包括数据可视化和告警等">
 <meta name="keywords" content="普罗米修斯">
 <meta property="og:type" content="article">
 <meta property="og:title" content="普罗米修斯之入门">
 <meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2020&#x2F;07&#x2F;29&#x2F;%E6%99%AE%E7%BD%97%E7%B1%B3%E4%BF%AE%E6%96%AF%E4%B9%8B%E5%85%A5%E9%97%A8&#x2F;index.html">
 <meta property="og:site_name" content="brokensword个人博客">
-<meta property="og:description" content="前序本文从整体上对Prometheus进行介绍，不设计使用细节。一个监控系统由哪些东西构成？  数据源，数据可以是rpc调用成功率、机器负载等等 数据收集服务器 数据使用，包括数据可视化和告警等">
+<meta property="og:description" content="前序本文从整体上对Prometheus进行介绍，不涉及使用细节。一个监控系统由哪些部分构成？  数据源，数据可以是rpc调用成功率、机器负载等 数据收集服务器 数据使用，包括数据可视化和告警等">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2020&#x2F;07&#x2F;29&#x2F;%E6%99%AE%E7%BD%97%E7%B1%B3%E4%BF%AE%E6%96%AF%E4%B9%8B%E5%85%A5%E9%97%A8&#x2F;%E7%9B%91%E6%8E%A7%E7%B3%BB%E7%BB%9F%E7%BB%93%E6%9E%84.jpg">
 <meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2020&#x2F;07&#x2F;29&#x2F;%E6%99%AE%E7%BD%97%E7%B1%B3%E4%BF%AE%E6%96%AF%E4%B9%8B%E5%85%A5%E9%97%A8&#x2F;%E6%99%AE%E7%BD%97%E7%B1%B3%E4%BF%AE%E6%96%AF%E6%9E%B6%E6%9E%84.jpg">
 <meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2020&#x2F;07&#x2F;29&#x2F;%E6%99%AE%E7%BD%97%E7%B1%B3%E4%BF%AE%E6%96%AF%E4%B9%8B%E5%85%A5%E9%97%A8&#x2F;grafana.png">
-<meta property="og:updated_time" content="2020-08-02T06:19:08.389Z">
+<meta property="og:updated_time" content="2020-08-09T03:10:39.010Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2020&#x2F;07&#x2F;29&#x2F;%E6%99%AE%E7%BD%97%E7%B1%B3%E4%BF%AE%E6%96%AF%E4%B9%8B%E5%85%A5%E9%97%A8&#x2F;%E7%9B%91%E6%8E%A7%E7%B3%BB%E7%BB%9F%E7%BB%93%E6%9E%84.jpg">
 
@@ -355,9 +355,9 @@
       
 
       
-        <h2 id="前序"><a href="#前序" class="headerlink" title="前序"></a>前序</h2><p>本文从整体上对Prometheus进行介绍，不设计使用细节。<br>一个监控系统由哪些东西构成？</p>
+        <h2 id="前序"><a href="#前序" class="headerlink" title="前序"></a>前序</h2><p>本文从整体上对Prometheus进行介绍，不涉及使用细节。<br>一个监控系统由哪些部分构成？</p>
 <ul>
-<li>数据源，数据可以是rpc调用成功率、机器负载等等</li>
+<li>数据源，数据可以是rpc调用成功率、机器负载等</li>
 <li>数据收集服务器</li>
 <li>数据使用，包括数据可视化和告警等     <a id="more"></a>  
 
@@ -366,7 +366,7 @@
 <p>监控系统构成如下：  </p>
 <img src="/2020/07/29/%E6%99%AE%E7%BD%97%E7%B1%B3%E4%BF%AE%E6%96%AF%E4%B9%8B%E5%85%A5%E9%97%A8/%E7%9B%91%E6%8E%A7%E7%B3%BB%E7%BB%9F%E7%BB%93%E6%9E%84.jpg" class="" title="监控系统结构">  
 
-<p>本文将从监控系统的构成数据源、数据收集和数据使用三方面介绍Promethus，Promethus的架构如下：  </p>
+<p>本文将从监控系统的构成。数据源、数据收集和数据使用三方面介绍Promethus，Promethus的架构如下：  </p>
 <img src="/2020/07/29/%E6%99%AE%E7%BD%97%E7%B1%B3%E4%BF%AE%E6%96%AF%E4%B9%8B%E5%85%A5%E9%97%A8/%E6%99%AE%E7%BD%97%E7%B1%B3%E4%BF%AE%E6%96%AF%E6%9E%B6%E6%9E%84.jpg" class="" title="普罗米修斯架构">  
 
 
@@ -378,7 +378,7 @@
 <li>MySQL server exporter</li>
 <li>Redis exporter<br>通过这些<code>exporter</code>便可以很方便的监控我们所使用的数据库的负载、连接情况等。  </li>
 </ul>
-<h2 id="数据收集"><a href="#数据收集" class="headerlink" title="数据收集"></a>数据收集</h2><h3 id="数据模型"><a href="#数据模型" class="headerlink" title="数据模型"></a>数据模型</h3><p>Prometheus收集的数据如下形式，</p>
+<h2 id="数据收集"><a href="#数据收集" class="headerlink" title="数据收集"></a>数据收集</h2><h3 id="数据模型"><a href="#数据模型" class="headerlink" title="数据模型"></a>数据模型</h3><p>Prometheus收集的数据形式如下，</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">&lt;metric name&gt;&#123;&lt;label name&gt;=&lt;label value&gt;, ...&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">example:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">api_http_requests_total&#123;method=<span class="string">"POST"</span>, handler=<span class="string">"/messages"</span>&#125;</span></pre></td></tr></table></figure>
 <p><code>metirc name</code>为观测指标，每一个指标可以有多个<code>label</code>.后续查询的时候可以使用不同的<code>lable</code>集合进行查询。Prometheus以时间序列的方式将这些数据进行存储（时序数据库）。例如</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">api_http_requests_total&#123;method=<span class="string">"POST"</span>, handler=<span class="string">"/messages"</span>&#125; <span class="number">5</span>点  value = <span class="number">2</span>  </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">api_http_requests_total&#123;method=<span class="string">"POST"</span>, handler=<span class="string">"/messages"</span>&#125; <span class="number">6</span>点  value = <span class="number">7</span></span></pre></td></tr></table></figure>
@@ -404,7 +404,7 @@
 <h3 id="数据可视化"><a href="#数据可视化" class="headerlink" title="数据可视化"></a>数据可视化</h3><ol>
 <li><p><code>expression browser</code><br> Prometheus服务器自带的可视化，地址为<code>服务器ip:port/graph</code>.主要用来单次特殊情况查询或者调试使用。一般数据可视化通过Grafana.  </p>
 </li>
-<li><p><code>Grafana</code><br> <a href="https://grafana.com/" target="_blank" rel="noopener">Grafana</a>支持PromQL进行查询，在Grafana中使用进行PromQL查询即可非常漂亮的视图，如下所示。</p>
+<li><p><code>Grafana</code><br> <a href="https://grafana.com/" target="_blank" rel="noopener">Grafana</a>支持PromQL进行查询，在Grafana中使用进行PromQL查询即可得到非常漂亮的视图，如下所示。</p>
  <img src="/2020/07/29/%E6%99%AE%E7%BD%97%E7%B1%B3%E4%BF%AE%E6%96%AF%E4%B9%8B%E5%85%A5%E9%97%A8/grafana.png" class="" title="grafana"> 
 
 </li>
@@ -412,7 +412,7 @@
 <h3 id="告警"><a href="#告警" class="headerlink" title="告警"></a>告警</h3><p>如Prometheus架构图所示，告警分为两部分，<code>Prometheus server</code>和<code>AlertManager</code>.  </p>
 <ul>
 <li>前者负责设置告警规则，并将发生的告警发送给<code>AlertManager</code>.  </li>
-<li>后者负责将告警的管理，例如忽略告警，或者通过email、电话或者企业微信群机器人的方式进行告警。</li>
+<li>后者负责将告警的管理，例如忽略告警，或者通过email、电话或者企业微信群机器人的方式进行通知。</li>
 </ul>
 <p>创建告警通知主要分为三步：</p>
 <ol>
