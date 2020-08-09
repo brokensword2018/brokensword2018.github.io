@@ -117,3 +117,9 @@ jsonContent:
       excerpt: false
       categories: false
       tags: true
+
+search:
+  path: search.xml   #在public目录的根目录下生成search.xml 文件，用于存储网站文章的文字数据.
+  field: post
+  format: html
+  limit: 10000
