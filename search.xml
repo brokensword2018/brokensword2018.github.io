@@ -3,14 +3,14 @@
   <entry>
     <title>Barton-Nackman 技巧</title>
     <url>/2019/12/24/Barton-Nackman-%E6%8A%80%E5%B7%A7/</url>
-    <content><![CDATA[<h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p><code>Barton-Nackman</code>技巧是通过传递自己本身作为模板参数, 在模板中实现一些依赖于派生类的方法,从而减少了派生类的代码量</p>
+    <content><![CDATA[<h3 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h3><p><code>Barton-Nackman</code>技巧是通过传递自己本身作为模板参数, 在模板中实现一些依赖于派生类的方法,从而减少了派生类的代码量</p>
 <a id="more"></a>
 
-<h3 id="代码示意"><a href="#代码示意" class="headerlink" title="代码示意"></a>代码示意</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> Derived&gt; <span class="class"><span class="keyword">class</span> <span class="title">less_than</span>&#123;</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">public</span>:</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="comment">//通过小于符号定义其他符号,例如大于,大于等于等</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">friend</span> <span class="keyword">bool</span> <span class="keyword">operator</span> &gt;(<span class="keyword">const</span> Derived&amp; lhs, <span class="keyword">const</span> Derived&amp; rhs)&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">return</span> rhs &lt; lhs;    </span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">friend</span> <span class="keyword">bool</span> <span class="keyword">operator</span> &gt;=(<span class="keyword">const</span> Derived&amp; lhs, <span class="keyword">const</span> Derived&amp; rhs)&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">return</span> !(lhs &lt; rhs);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    </span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;;</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="comment">//这个类需要自己定义小于符号,然后通过继承less_than,可以自动生成大于符号</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SomeClass</span> :</span> <span class="keyword">public</span> less_than&lt;SomeClass&gt;&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">public</span>:</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">int</span> value_;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    SomeClass(<span class="keyword">int</span> value) : value_(value) &#123; &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">friend</span> <span class="keyword">bool</span> <span class="keyword">operator</span> &lt;(<span class="keyword">const</span> SomeClass&amp; lhs, <span class="keyword">const</span> SomeClass&amp; rhs)&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">return</span> lhs.value_ &lt; rhs.value_;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;  </span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;;</span></pre></td></tr></table></figure>
+<h3 id="2-代码示意"><a href="#2-代码示意" class="headerlink" title="2. 代码示意"></a>2. 代码示意</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> Derived&gt; <span class="class"><span class="keyword">class</span> <span class="title">less_than</span>&#123;</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">public</span>:</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="comment">//通过小于符号定义其他符号,例如大于,大于等于等</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">friend</span> <span class="keyword">bool</span> <span class="keyword">operator</span> &gt;(<span class="keyword">const</span> Derived&amp; lhs, <span class="keyword">const</span> Derived&amp; rhs)&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">return</span> rhs &lt; lhs;    </span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">friend</span> <span class="keyword">bool</span> <span class="keyword">operator</span> &gt;=(<span class="keyword">const</span> Derived&amp; lhs, <span class="keyword">const</span> Derived&amp; rhs)&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">return</span> !(lhs &lt; rhs);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    </span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;;</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="comment">//这个类需要自己定义小于符号,然后通过继承less_than,可以自动生成大于符号</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SomeClass</span> :</span> <span class="keyword">public</span> less_than&lt;SomeClass&gt;&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">public</span>:</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">int</span> value_;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    SomeClass(<span class="keyword">int</span> value) : value_(value) &#123; &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">friend</span> <span class="keyword">bool</span> <span class="keyword">operator</span> &lt;(<span class="keyword">const</span> SomeClass&amp; lhs, <span class="keyword">const</span> SomeClass&amp; rhs)&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">return</span> lhs.value_ &lt; rhs.value_;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;  </span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;;</span></pre></td></tr></table></figure>
 <p>测试代码:</p>
 <figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function">SomeClass <span class="title">a</span><span class="params">(<span class="number">1</span>)</span></span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="function">SomeClass <span class="title">b</span><span class="params">(<span class="number">2</span>)</span></span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">(a &lt; b);</span></pre></td></tr><tr><td class="code"><pre><span class="line">(a &gt; b); <span class="comment">//work well</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">(a &gt;= b); <span class="comment">//work well</span></span></pre></td></tr></table></figure>
 
-<h3 id="如何使用"><a href="#如何使用" class="headerlink" title="如何使用"></a>如何使用</h3><p><code>boost/operators.hpp</code>中提供了很多这样的模板类,包含该头文件,然后自己类继承即可.</p>
+<h3 id="3-如何使用"><a href="#3-如何使用" class="headerlink" title="3. 如何使用"></a>3. 如何使用</h3><p><code>boost/operators.hpp</code>中提供了很多这样的模板类,包含该头文件,然后自己类继承即可.</p>
 <figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">less_than_comparable : 派生类提供小于,自动生成 &gt; , &gt;= , &lt;=</span></pre></td></tr><tr><td class="code"><pre><span class="line">equality_comparable : 派生类提供等于, 自动生成 !=</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"> class MyOwnClass : <span class="keyword">public</span> less_than_comparable&lt;MyOwnClass&gt;&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">public</span>:</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="comment">//实现小于符号,该类会自动生成 &lt;=, &gt;, &gt;=</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">friend</span> <span class="keyword">bool</span> <span class="keyword">operator</span> &lt;(<span class="keyword">const</span> SomeClass&amp; lhs, <span class="keyword">const</span> SomeClass&amp; rhs);</span></pre></td></tr><tr><td class="code"><pre><span class="line"> &#125;;</span></pre></td></tr></table></figure>]]></content>
       <categories>
         <category>C++语言</category>
@@ -23,12 +23,12 @@
   <entry>
     <title>linux命令 awk</title>
     <url>/2020/07/19/linux%E5%91%BD%E4%BB%A4-awk/</url>
-    <content><![CDATA[<h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p><code>awk</code>是一个用于处理文本的强大工具,取名为三位创始人<code>Alfred Aho，Peter  Weinberger</code>, 和 <code>Brian Kernighan</code> 的 <code>Family Name</code>的首字符。</p>
+    <content><![CDATA[<h3 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h3><p><code>awk</code>是一个用于处理文本的强大工具,取名为三位创始人<code>Alfred Aho，Peter  Weinberger</code>, 和 <code>Brian Kernighan</code> 的 <code>Family Name</code>的首字符。</p>
 <a id="more"></a>
-<h3 id="基本语法"><a href="#基本语法" class="headerlink" title="基本语法"></a>基本语法</h3><p><code>akw [options] &#39;awk programa&#39; inputfile</code><br>或<br><code>akw [options] -f &#39;awk programa file&#39; inputfile</code>   </p>
+<h3 id="2-基本语法"><a href="#2-基本语法" class="headerlink" title="2. 基本语法"></a>2. 基本语法</h3><p><code>akw [options] &#39;awk programa&#39; inputfile</code><br>或<br><code>akw [options] -f &#39;awk programa file&#39; inputfile</code>   </p>
 <p><code>awk programa</code>是指<code>awk</code>的命令,构成为<br><code>pattern {action}</code>,<code>pattern</code>是正则表达式使用<code>/</code>包裹起来,如<code>/regular-expression/</code>,然后以行为单位对满足条件的行执行<code>action</code>操作.</p>
-<h3 id="常用option"><a href="#常用option" class="headerlink" title="常用option"></a>常用<code>option</code></h3><p><code>-F</code>:指定文件的分隔符,默认为空格或者<code>tab</code> ;<code>awk</code>将文本的一行以分隔符分割成多个域<code>$0</code>指整行,<code>$1,$2...</code>分别指第二列,第三列等.  </p>
-<h3 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h3><p>假设文件<code>mail-list</code>内容为 ： </p>
+<h3 id="3-常用option"><a href="#3-常用option" class="headerlink" title="3. 常用option"></a>3. 常用<code>option</code></h3><p><code>-F</code>:指定文件的分隔符,默认为空格或者<code>tab</code> ;<code>awk</code>将文本的一行以分隔符分割成多个域<code>$0</code>指整行,<code>$1,$2...</code>分别指第二列,第三列等.  </p>
+<h3 id="4-例子"><a href="#4-例子" class="headerlink" title="4. 例子"></a>4. 例子</h3><p>假设文件<code>mail-list</code>内容为 ： </p>
 <pre><code>Amelia       555-5553     amelia.zodiacusque@gmail.com    F
 Broderick    555-0542     broderick.aliquotiens@yahoo.com R
 Julie        555-6699     julie.perscrutabor@skeeve.com   F
@@ -44,7 +44,7 @@ Samuel       555-3430     samuel.lanceolis@shu.edu        A</code></pre><p><code
   <entry>
     <title>普罗米修斯之入门</title>
     <url>/2020/07/29/%E6%99%AE%E7%BD%97%E7%B1%B3%E4%BF%AE%E6%96%AF%E4%B9%8B%E5%85%A5%E9%97%A8/</url>
-    <content><![CDATA[<h2 id="前序"><a href="#前序" class="headerlink" title="前序"></a>前序</h2><p>本文从整体上对Prometheus进行介绍，不涉及使用细节。<br>一个监控系统由哪些部分构成？</p>
+    <content><![CDATA[<h2 id="1-前序"><a href="#1-前序" class="headerlink" title="1. 前序"></a>1. 前序</h2><p>本文从整体上对Prometheus进行介绍，不涉及使用细节。<br>一个监控系统由哪些部分构成？</p>
 <ul>
 <li>数据源，数据可以是rpc调用成功率、机器负载等</li>
 <li>数据收集服务器</li>
@@ -59,20 +59,20 @@ Samuel       555-3430     samuel.lanceolis@shu.edu        A</code></pre><p><code
 <img src="/2020/07/29/%E6%99%AE%E7%BD%97%E7%B1%B3%E4%BF%AE%E6%96%AF%E4%B9%8B%E5%85%A5%E9%97%A8/%E6%99%AE%E7%BD%97%E7%B1%B3%E4%BF%AE%E6%96%AF%E6%9E%B6%E6%9E%84.jpg" class="" title="普罗米修斯架构">  
 
 
-<h2 id="数据源"><a href="#数据源" class="headerlink" title="数据源"></a>数据源</h2><p>Promethus主要有两种数据源，分别为使用<code>client libraries</code>的方式和<code>exporter</code>的方式。  </p>
-<h3 id="使用client-libraries"><a href="#使用client-libraries" class="headerlink" title="使用client libraries"></a>使用<code>client libraries</code></h3><p>使用<code>client libraries</code>将会把应用程序需要监控的数据以<code>http</code>接口的形式暴露给数据收集服务器。<br>Promethus官方提供了， <code>Go, java, scala, Python, Ruby</code>语言的库，其他语言，如<code>c++, c, R</code>等有第三方的库。<br><strong>特别的</strong>当你的进程是个短命鬼时（23333），Promethus提供了一个叫做<code>Pushgateway</code>的工具，你可以把数据推送到该处，Promethus也可以到该处收集数据。  </p>
-<h3 id="使用exporter"><a href="#使用exporter" class="headerlink" title="使用exporter"></a>使用<code>exporter</code></h3><p>使用<code>exporter</code>可以将第三方系统中一些现有指标进行导出。<br>例如数据库相关的</p>
+<h2 id="2-数据源"><a href="#2-数据源" class="headerlink" title="2. 数据源"></a>2. 数据源</h2><p>Promethus主要有两种数据源，分别为使用<code>client libraries</code>的方式和<code>exporter</code>的方式。  </p>
+<h3 id="2-1-使用client-libraries"><a href="#2-1-使用client-libraries" class="headerlink" title="2.1. 使用client libraries"></a>2.1. 使用<code>client libraries</code></h3><p>使用<code>client libraries</code>将会把应用程序需要监控的数据以<code>http</code>接口的形式暴露给数据收集服务器。<br>Promethus官方提供了， <code>Go, java, scala, Python, Ruby</code>语言的库，其他语言，如<code>c++, c, R</code>等有第三方的库。<br><strong>特别的</strong>当你的进程是个短命鬼时（23333），Promethus提供了一个叫做<code>Pushgateway</code>的工具，你可以把数据推送到该处，Promethus也可以到该处收集数据。  </p>
+<h3 id="2-2-使用exporter"><a href="#2-2-使用exporter" class="headerlink" title="2.2. 使用exporter"></a>2.2. 使用<code>exporter</code></h3><p>使用<code>exporter</code>可以将第三方系统中一些现有指标进行导出。<br>例如数据库相关的</p>
 <ul>
 <li>ClickHouse exporter</li>
 <li>MySQL server exporter</li>
 <li>Redis exporter<br>通过这些<code>exporter</code>便可以很方便的监控我们所使用的数据库的负载、连接情况等。  </li>
 </ul>
-<h2 id="数据收集"><a href="#数据收集" class="headerlink" title="数据收集"></a>数据收集</h2><h3 id="数据模型"><a href="#数据模型" class="headerlink" title="数据模型"></a>数据模型</h3><p>Prometheus收集的数据形式如下，</p>
+<h2 id="3-数据收集"><a href="#3-数据收集" class="headerlink" title="3. 数据收集"></a>3. 数据收集</h2><h3 id="3-1-数据模型"><a href="#3-1-数据模型" class="headerlink" title="3.1. 数据模型"></a>3.1. 数据模型</h3><p>Prometheus收集的数据形式如下，</p>
 <figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">&lt;metric name&gt;&#123;&lt;label name&gt;=&lt;label value&gt;, ...&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">example:</span></pre></td></tr><tr><td class="code"><pre><span class="line">api_http_requests_total&#123;method=<span class="string">"POST"</span>, handler=<span class="string">"/messages"</span>&#125;</span></pre></td></tr></table></figure>
 <p><code>metirc name</code>为观测指标，每一个指标可以有多个<code>label</code>.后续查询的时候可以使用不同的<code>lable</code>集合进行查询。Prometheus以时间序列的方式将这些数据进行存储（时序数据库）。例如</p>
 <figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">api_http_requests_total&#123;method=<span class="string">"POST"</span>, handler=<span class="string">"/messages"</span>&#125; <span class="number">5</span>点  value = <span class="number">2</span>  </span></pre></td></tr><tr><td class="code"><pre><span class="line">api_http_requests_total&#123;method=<span class="string">"POST"</span>, handler=<span class="string">"/messages"</span>&#125; <span class="number">6</span>点  value = <span class="number">7</span></span></pre></td></tr></table></figure>
 
-<h3 id="metric的类型"><a href="#metric的类型" class="headerlink" title="metric的类型"></a><code>metric</code>的类型</h3><p>Prometheus提供了四种<code>metric</code>类型进行使用。  </p>
+<h3 id="3-2-metric的类型"><a href="#3-2-metric的类型" class="headerlink" title="3.2. metric的类型"></a>3.2. <code>metric</code>的类型</h3><p>Prometheus提供了四种<code>metric</code>类型进行使用。  </p>
 <ol>
 <li><p><code>counter</code>:计数器，只增不减。<br>可以用来监测<code>http</code>的请求量等。</p>
 </li>
@@ -83,14 +83,14 @@ Samuel       555-3430     samuel.lanceolis@shu.edu        A</code></pre><p><code
 <li><p><code>Summary</code>，也是用来监测数据分布。（具体使用见官方文档）<br>例如一个班级，90%的人分数都在多少之上。该百分比是自己可以配置的</p>
 </li>
 </ol>
-<h3 id="数据源配置"><a href="#数据源配置" class="headerlink" title="数据源配置"></a>数据源配置</h3><p>一个单一的数据源称作<code>instance</code>, 一个类型的数据源称作一个<code>job</code>.例如：</p>
+<h3 id="3-3-数据源配置"><a href="#3-3-数据源配置" class="headerlink" title="3.3. 数据源配置"></a>3.3. 数据源配置</h3><p>一个单一的数据源称作<code>instance</code>, 一个类型的数据源称作一个<code>job</code>.例如：</p>
 <figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">job: api-server</span></pre></td></tr><tr><td class="code"><pre><span class="line">    instance <span class="number">1</span>: <span class="number">1.2</span><span class="number">.3</span><span class="number">.4</span>:<span class="number">5670</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    instance <span class="number">2</span>: <span class="number">1.2</span><span class="number">.3</span><span class="number">.4</span>:<span class="number">5671</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    instance <span class="number">3</span>: <span class="number">5.6</span><span class="number">.7</span><span class="number">.8</span>:<span class="number">5670</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    instance <span class="number">4</span>: <span class="number">5.6</span><span class="number">.7</span><span class="number">.8</span>:<span class="number">5671</span></span></pre></td></tr></table></figure>
 <p>上面的例子配置了一个名为<code>api-server</code>的job，当Prometheus监控这个job时，它会根据下面配置的4个机器的<code>ip:port</code>去收集数据。</p>
-<h2 id="数据使用"><a href="#数据使用" class="headerlink" title="数据使用"></a>数据使用</h2><p>本节首先介绍Proetheus的数据查询方式，然后介绍数据的可视化和根据数据进行告警。</p>
-<h3 id="查询语言"><a href="#查询语言" class="headerlink" title="查询语言"></a>查询语言</h3><p>Prometheus提供了专用的查询语言<a href="https://prometheus.io/docs/prometheus/latest/querying/basics/" target="_blank" rel="noopener">PromQL</a>能够很方便的对收集来的数据<br>进行查询统计，从而为可视化平台和告警提供数据。例如</p>
+<h2 id="4-数据使用"><a href="#4-数据使用" class="headerlink" title="4. 数据使用"></a>4. 数据使用</h2><p>本节首先介绍Proetheus的数据查询方式，然后介绍数据的可视化和根据数据进行告警。</p>
+<h3 id="4-1-查询语言"><a href="#4-1-查询语言" class="headerlink" title="4.1. 查询语言"></a>4.1. 查询语言</h3><p>Prometheus提供了专用的查询语言<a href="https://prometheus.io/docs/prometheus/latest/querying/basics/" target="_blank" rel="noopener">PromQL</a>能够很方便的对收集来的数据<br>进行查询统计，从而为可视化平台和告警提供数据。例如</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sum(http_requests_total&#123;method&#x3D;&quot;GET&quot;&#125;) &#x2F;&#x2F;所有instance, 方法为&quot;GET&quot;的http请求数量</span></pre></td></tr><tr><td class="code"><pre><span class="line">sum(http_requests_total&#123;method&#x3D;&quot;GET&quot;&#125; offset 5m) &#x2F;&#x2F;offset表示5分钟之前。总的意思为:5分钟之前所有instance, 方法为&quot;GET&quot;的http请求数量</span></pre></td></tr></table></figure>
 
-<h3 id="数据可视化"><a href="#数据可视化" class="headerlink" title="数据可视化"></a>数据可视化</h3><ol>
+<h3 id="4-2-数据可视化"><a href="#4-2-数据可视化" class="headerlink" title="4.2. 数据可视化"></a>4.2. 数据可视化</h3><ol>
 <li><p><code>expression browser</code><br> Prometheus服务器自带的可视化，地址为<code>服务器ip:port/graph</code>.主要用来单次特殊情况查询或者调试使用。一般数据可视化通过Grafana.  </p>
 </li>
 <li><p><code>Grafana</code><br> <a href="https://grafana.com/" target="_blank" rel="noopener">Grafana</a>支持PromQL进行查询，在Grafana中使用进行PromQL查询即可得到非常漂亮的视图，如下所示。</p>
@@ -98,7 +98,7 @@ Samuel       555-3430     samuel.lanceolis@shu.edu        A</code></pre><p><code
 
 </li>
 </ol>
-<h3 id="告警"><a href="#告警" class="headerlink" title="告警"></a>告警</h3><p>如Prometheus架构图所示，告警分为两部分，<code>Prometheus server</code>和<code>AlertManager</code>.  </p>
+<h3 id="4-3-告警"><a href="#4-3-告警" class="headerlink" title="4.3. 告警"></a>4.3. 告警</h3><p>如Prometheus架构图所示，告警分为两部分，<code>Prometheus server</code>和<code>AlertManager</code>.  </p>
 <ul>
 <li>前者负责设置告警规则，并将发生的告警发送给<code>AlertManager</code>.  </li>
 <li>后者负责将告警的管理，例如忽略告警，或者通过email、电话或者企业微信群机器人的方式进行通知。</li>
@@ -109,13 +109,79 @@ Samuel       555-3430     samuel.lanceolis@shu.edu        A</code></pre><p><code
 <li><code>Prometheus server</code>给<code>AlertManager</code>发送告警的相关配置。</li>
 <li>在<code>Prometheus server</code>中设置告警规则。</li>
 </ol>
-<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p><a href="https://prometheus.io/docs/introduction/overview/" target="_blank" rel="noopener">Prometheus官方文档</a></p>
+<h2 id="5-参考文档"><a href="#5-参考文档" class="headerlink" title="5. 参考文档"></a>5. 参考文档</h2><p><a href="https://prometheus.io/docs/introduction/overview/" target="_blank" rel="noopener">Prometheus官方文档</a></p>
 ]]></content>
       <categories>
         <category>工具学习</category>
       </categories>
       <tags>
         <tag>普罗米修斯</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>从Prometheus的计算规则到Grafana的数据展示</title>
+    <url>/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/</url>
+    <content><![CDATA[<h2 id="1-前序"><a href="#1-前序" class="headerlink" title="1. 前序"></a>1. 前序</h2><p>本文目标为阐释清楚：<strong>一条<code>PromQL</code>在执行过程中发生了什么，从而得到<code>Grafana</code>中的图像</strong></p>
+<a id="more"></a>
+
+<h2 id="2-PromQL所操作的对象"><a href="#2-PromQL所操作的对象" class="headerlink" title="2. PromQL所操作的对象"></a>2. <code>PromQL</code>所操作的对象</h2><p>首先明确</p>
+<ol>
+<li><code>PromQL</code>计算依赖于收集数据的<code>timestamp</code></li>
+<li>收集数据的<code>timestamp</code>是<code>Prometheus server</code>发出<code>GET</code>请求时的时间戳</li>
+<li><code>Prometheus server</code>发出<code>GET</code>请求的时间并不严格符合数据的收集间隔</li>
+</ol>
+<p>ps: <code>timestamp</code>函数可以查看收集上来数据的时间戳<br>接下来对上述第3点做简单解释。</p>
+<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/Prometheus%E7%9A%84GET%E8%AF%B7%E6%B1%82%E6%97%B6%E9%97%B4.jpg" class="" title="Prometheus的GET请求时间">
+
+<p>如上图所示，蓝色的点为按照我们设置的数据收集间隔，<code>GET</code>请求的理论时间，理论时间间隔严格等于设置的收集时间间隔。然而实际上当<code>Prometheus server</code>负载较大时，实际发出<code>GET</code>请求的时间相对于理论时间可能有一定的延迟，如<code>a)</code>所示; 当<code>Prometheus server</code>同时向多个<code>Instance</code>收集数据时，<code>Prometheus server</code>甚至可能将多个<code>GET</code>请求离散分布到收集数据的时间间隔中，如<code>b)</code>所示。</p>
+<h2 id="3-Instant-Range-queries和Instant-Range-vector-selectors"><a href="#3-Instant-Range-queries和Instant-Range-vector-selectors" class="headerlink" title="3. Instant/Range queries和Instant/Range vector selectors"></a>3. <code>Instant/Range queries</code>和<code>Instant/Range vector selectors</code></h2><p><a href="https://prometheus.io/docs/prometheus/latest/querying/basics/" target="_blank" rel="noopener">Instant/Range vector selectors</a>是两种查询语句。</p>
+<ul>
+<li><code>Instant vector selectors</code>：在给定时间处从时间序列中选择出一个样本点</li>
+<li><code>Range vector selectors</code>：从时间序列中选出<code>timestamp</code>在区间<code>[给定时间 - range duration, 给定时间]</code>的样本点</li>
+</ul>
+<p><a href="https://prometheus.io/docs/prometheus/latest/querying/api/" target="_blank" rel="noopener">Instant/Range queries</a>是查询时间的范围的区别。</p>
+<ul>
+<li><code>Instant queries</code>：对某一个时间点进行查询。</li>
+<li><code>Range queries</code>：对某一段时间区间进行查询。<code>step</code>参数是指将查询区间按照<code>step</code>大小的间隔划分得到多个时间点，在这些时间点上使用<code>Instant/Range vector selectors</code>。可以这样理解，<code>Range queries</code>通过<code>step</code>参数转化为了多个<code>Instant queries</code>。假设查询区间为<code>[0, 90]s</code>,<code>step</code>参数为30s,那么该查询就变成了在<code>0s, 30s, 60s, 90s</code>的四次查询。在Grafana中显示横坐标就是时间，纵坐标就是值。Grafana显示变化趋势的图像一定是<code>Range queries</code>。</li>
+</ul>
+<p>假设一个<code>counter</code>类型的统计数据，名字为<code>http_request</code>,它的统计结果如下图所示：</p>
+<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/http_request%E5%81%87%E8%AE%BE%E6%95%B0%E6%8D%AE.bmp" class="" title="http_request假设数据">
+
+<h3 id="3-1-Instant-queries-Instant-vector-selectors"><a href="#3-1-Instant-queries-Instant-vector-selectors" class="headerlink" title="3.1. Instant queries + Instant vector selectors"></a>3.1. <code>Instant queries</code> + <code>Instant vector selectors</code></h3><ul>
+<li>假定查询时间为<code>50s</code></li>
+<li>查询语句直接为<code>http_request</code><br>查询结果为15，如下图所示。<code>Instant vector selectors</code>的查询规则为<strong>向后搜索到第一个时间戳小于等下查询时间的样本点；若搜索距离超过5分钟仍然无样本点，则查询结果为空</strong>。<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/instant_queries%E5%92%8Cinstant_vector_selector.bmp" class="" title="instant_queries和instant_vector_selector">
+
+</li>
+</ul>
+<h3 id="3-2-Instant-queries-Range-vector-selectors"><a href="#3-2-Instant-queries-Range-vector-selectors" class="headerlink" title="3.2. Instant queries + Range vector selectors"></a>3.2. <code>Instant queries</code> + <code>Range vector selectors</code></h3><ul>
+<li>假定查询时间为65s</li>
+<li>查询语句为<code>http_request[1m]</code><br>查询结果为<code>7(15s), 9(30s), 15(45s), 17(60s)</code>。我们可以使用一些函数作用于这些查询结果,例如<code>increase</code>函数，结果为10。表明查询时间处的<code>qpm</code>为10。示意图如下</li>
+</ul>
+<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/instant_queries%E5%92%8Crange_vector_selector.bmp" class="" title="instant_queries和range_vector_selector">
+
+<h3 id="3-3-Range-queries-Instant-vector-selectors"><a href="#3-3-Range-queries-Instant-vector-selectors" class="headerlink" title="3.3. Range queries + Instant vector selectors"></a>3.3. <code>Range queries</code> + <code>Instant vector selectors</code></h3><ul>
+<li>查询区间为<code>[0, 90]s</code>,<code>step</code>参数为30s</li>
+<li>查询语句直接为<code>http_request</code><br>查询结果为<code>1(0s), 9(30s), 17(60s), 30(90s)</code>。如下图所示<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/range_queries%E5%92%8Cinstant_vector_selector.bmp" class="" title="range_queries和instant_vector_selector">
+
+</li>
+</ul>
+<h3 id="3-4-Range-queries-Range-vector-selectors"><a href="#3-4-Range-queries-Range-vector-selectors" class="headerlink" title="3.4. Range queries + Range vector selectors"></a>3.4. <code>Range queries</code> + <code>Range vector selectors</code></h3><ul>
+<li>查询区间为<code>[0, 90]s</code>,<code>step</code>参数为30s</li>
+<li>查询语句直接为<code>http_request[15s]</code><br>查询结果为<code>[1(0s)], [7(15s),9(30s)], [15(45s),17(60s)], [23(75s),30(90s)]</code>如下图所示。<code>Range vector selectors</code>的计算结果无法直接用于作图，需要使用函数对其进行计算才能进行图像绘制。例如使用<code>increase</code>函数，结果为<code>空, 2, 2, 7</code>，空是因为第一组数据只有一个数<code>increase</code>函数无法计算。<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/range_queries%E5%92%8Crange_vector_selector.bmp" class="" title="range_queries和range_vector_selector">
+
+</li>
+</ul>
+<h2 id="4-Grafana中的图像展示"><a href="#4-Grafana中的图像展示" class="headerlink" title="4. Grafana中的图像展示"></a>4. <code>Grafana</code>中的图像展示</h2><p>Grafana中Prometheus的参数如下所示，其中Interval 乘以 Resolution（显示精度）就是 Prometheus参数。</p>
+<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/Grafana%E4%B8%ADPrometheus%E5%8F%82%E6%95%B0.bmp" class="" title="Grafana中Prometheus参数">
+<p>ps: 可通过Query inspector查看具体的step</p>
+<h2 id="5-参考"><a href="#5-参考" class="headerlink" title="5. 参考"></a>5. 参考</h2><p><a href="https://prometheus.io/docs/introduction/overview/" target="_blank" rel="noopener">Prometheus官方文档</a><br><a href="https://grafana.com/docs/grafana/latest/" target="_blank" rel="noopener">Grafana文档</a><br><a href="https://segmentfault.com/a/1190000017553625" target="_blank" rel="noopener">详解Prometheus range query中的step参数</a></p>
+]]></content>
+      <categories>
+        <category>工具学习</category>
+      </categories>
+      <tags>
+        <tag>普罗米修斯</tag>
+        <tag>Grafana</tag>
       </tags>
   </entry>
 </search>

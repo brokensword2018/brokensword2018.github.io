@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="普罗米修斯,Grafana," />
 
 
 
@@ -79,14 +79,24 @@
 
 
 
-<meta name="description" content="记录学习与生活">
-<meta property="og:type" content="website">
-<meta property="og:title" content="brokensword个人博客">
-<meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;tags&#x2F;linux&#x2F;index.html">
+<meta name="description" content="1. 前序本文目标为阐释清楚：一条PromQL在执行过程中发生了什么，从而得到Grafana中的图像">
+<meta name="keywords" content="普罗米修斯,Grafana">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从Prometheus的计算规则到Grafana的数据展示">
+<meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2020&#x2F;08&#x2F;16&#x2F;%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA&#x2F;index.html">
 <meta property="og:site_name" content="brokensword个人博客">
-<meta property="og:description" content="记录学习与生活">
+<meta property="og:description" content="1. 前序本文目标为阐释清楚：一条PromQL在执行过程中发生了什么，从而得到Grafana中的图像">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2020&#x2F;08&#x2F;16&#x2F;%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA&#x2F;Prometheus%E7%9A%84GET%E8%AF%B7%E6%B1%82%E6%97%B6%E9%97%B4.jpg">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2020&#x2F;08&#x2F;16&#x2F;%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA&#x2F;http_request%E5%81%87%E8%AE%BE%E6%95%B0%E6%8D%AE.bmp">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2020&#x2F;08&#x2F;16&#x2F;%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA&#x2F;instant_queries%E5%92%8Cinstant_vector_selector.bmp">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2020&#x2F;08&#x2F;16&#x2F;%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA&#x2F;instant_queries%E5%92%8Crange_vector_selector.bmp">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2020&#x2F;08&#x2F;16&#x2F;%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA&#x2F;range_queries%E5%92%8Cinstant_vector_selector.bmp">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2020&#x2F;08&#x2F;16&#x2F;%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA&#x2F;range_queries%E5%92%8Crange_vector_selector.bmp">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2020&#x2F;08&#x2F;16&#x2F;%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA&#x2F;Grafana%E4%B8%ADPrometheus%E5%8F%82%E6%95%B0.bmp">
+<meta property="og:updated_time" content="2020-08-16T15:51:36.278Z">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2020&#x2F;08&#x2F;16&#x2F;%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA&#x2F;Prometheus%E7%9A%84GET%E8%AF%B7%E6%B1%82%E6%97%B6%E9%97%B4.jpg">
 
 
 
@@ -116,13 +126,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/tags/linux/"/>
+  <link rel="canonical" href="http://yoursite.com/2020/08/16/从Prometheus的计算规则到Grafana的数据展示/"/>
 
 
 
 
 
-  <title>标签: linux | brokensword个人博客</title>
+  <title>从Prometheus的计算规则到Grafana的数据展示 | brokensword个人博客</title>
   
 
 
@@ -141,7 +151,7 @@
     
   
 
-  <div class="container sidebar-position-left ">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -279,54 +289,235 @@
           <div id="content" class="content">
             
 
-  
-  
-  
-  <div class="post-block tag">
+  <div id="posts" class="posts-expand">
+    
 
-    <div id="posts" class="posts-collapse">
-      <div class="collection-title">
-        <h1>linux<small>标签</small>
-        </h1>
-      </div>
+  
 
-      
-        
+  
+  
+  
 
   <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/">
 
-      <h2 class="post-title">
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="brokensword">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/ruiwen.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="brokensword个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
         
-            <a class="post-title-link" href="/2020/07/19/linux%E5%91%BD%E4%BB%A4-awk/" itemprop="url">
-              
-                <span itemprop="name">linux命令 awk</span>
-              
-            </a>
         
-      </h2>
+          <h1 class="post-title" itemprop="name headline">从Prometheus的计算规则到Grafana的数据展示</h1>
+        
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2020-07-19T15:52:28+08:00"
-              content="2020-07-19" >
-          07-19
-        </time>
-      </div>
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-08-16T17:02:33+08:00">
+                2020-08-16
+              </time>
+            
 
-    </header>
-  </article>
+            
 
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%B7%A5%E5%85%B7%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">工具学习</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/" class="leancloud_visitors" data-flag-title="从Prometheus的计算规则到Grafana的数据展示">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="1-前序"><a href="#1-前序" class="headerlink" title="1. 前序"></a>1. 前序</h2><p>本文目标为阐释清楚：<strong>一条<code>PromQL</code>在执行过程中发生了什么，从而得到<code>Grafana</code>中的图像</strong></p>
+<a id="more"></a>
+
+<h2 id="2-PromQL所操作的对象"><a href="#2-PromQL所操作的对象" class="headerlink" title="2. PromQL所操作的对象"></a>2. <code>PromQL</code>所操作的对象</h2><p>首先明确</p>
+<ol>
+<li><code>PromQL</code>计算依赖于收集数据的<code>timestamp</code></li>
+<li>收集数据的<code>timestamp</code>是<code>Prometheus server</code>发出<code>GET</code>请求时的时间戳</li>
+<li><code>Prometheus server</code>发出<code>GET</code>请求的时间并不严格符合数据的收集间隔</li>
+</ol>
+<p>ps: <code>timestamp</code>函数可以查看收集上来数据的时间戳<br>接下来对上述第3点做简单解释。</p>
+<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/Prometheus%E7%9A%84GET%E8%AF%B7%E6%B1%82%E6%97%B6%E9%97%B4.jpg" class="" title="Prometheus的GET请求时间">
+
+<p>如上图所示，蓝色的点为按照我们设置的数据收集间隔，<code>GET</code>请求的理论时间，理论时间间隔严格等于设置的收集时间间隔。然而实际上当<code>Prometheus server</code>负载较大时，实际发出<code>GET</code>请求的时间相对于理论时间可能有一定的延迟，如<code>a)</code>所示; 当<code>Prometheus server</code>同时向多个<code>Instance</code>收集数据时，<code>Prometheus server</code>甚至可能将多个<code>GET</code>请求离散分布到收集数据的时间间隔中，如<code>b)</code>所示。</p>
+<h2 id="3-Instant-Range-queries和Instant-Range-vector-selectors"><a href="#3-Instant-Range-queries和Instant-Range-vector-selectors" class="headerlink" title="3. Instant/Range queries和Instant/Range vector selectors"></a>3. <code>Instant/Range queries</code>和<code>Instant/Range vector selectors</code></h2><p><a href="https://prometheus.io/docs/prometheus/latest/querying/basics/" target="_blank" rel="noopener">Instant/Range vector selectors</a>是两种查询语句。</p>
+<ul>
+<li><code>Instant vector selectors</code>：在给定时间处从时间序列中选择出一个样本点</li>
+<li><code>Range vector selectors</code>：从时间序列中选出<code>timestamp</code>在区间<code>[给定时间 - range duration, 给定时间]</code>的样本点</li>
+</ul>
+<p><a href="https://prometheus.io/docs/prometheus/latest/querying/api/" target="_blank" rel="noopener">Instant/Range queries</a>是查询时间的范围的区别。</p>
+<ul>
+<li><code>Instant queries</code>：对某一个时间点进行查询。</li>
+<li><code>Range queries</code>：对某一段时间区间进行查询。<code>step</code>参数是指将查询区间按照<code>step</code>大小的间隔划分得到多个时间点，在这些时间点上使用<code>Instant/Range vector selectors</code>。可以这样理解，<code>Range queries</code>通过<code>step</code>参数转化为了多个<code>Instant queries</code>。假设查询区间为<code>[0, 90]s</code>,<code>step</code>参数为30s,那么该查询就变成了在<code>0s, 30s, 60s, 90s</code>的四次查询。在Grafana中显示横坐标就是时间，纵坐标就是值。Grafana显示变化趋势的图像一定是<code>Range queries</code>。</li>
+</ul>
+<p>假设一个<code>counter</code>类型的统计数据，名字为<code>http_request</code>,它的统计结果如下图所示：</p>
+<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/http_request%E5%81%87%E8%AE%BE%E6%95%B0%E6%8D%AE.bmp" class="" title="http_request假设数据">
+
+<h3 id="3-1-Instant-queries-Instant-vector-selectors"><a href="#3-1-Instant-queries-Instant-vector-selectors" class="headerlink" title="3.1. Instant queries + Instant vector selectors"></a>3.1. <code>Instant queries</code> + <code>Instant vector selectors</code></h3><ul>
+<li>假定查询时间为<code>50s</code></li>
+<li>查询语句直接为<code>http_request</code><br>查询结果为15，如下图所示。<code>Instant vector selectors</code>的查询规则为<strong>向后搜索到第一个时间戳小于等下查询时间的样本点；若搜索距离超过5分钟仍然无样本点，则查询结果为空</strong>。<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/instant_queries%E5%92%8Cinstant_vector_selector.bmp" class="" title="instant_queries和instant_vector_selector">
+
+</li>
+</ul>
+<h3 id="3-2-Instant-queries-Range-vector-selectors"><a href="#3-2-Instant-queries-Range-vector-selectors" class="headerlink" title="3.2. Instant queries + Range vector selectors"></a>3.2. <code>Instant queries</code> + <code>Range vector selectors</code></h3><ul>
+<li>假定查询时间为65s</li>
+<li>查询语句为<code>http_request[1m]</code><br>查询结果为<code>7(15s), 9(30s), 15(45s), 17(60s)</code>。我们可以使用一些函数作用于这些查询结果,例如<code>increase</code>函数，结果为10。表明查询时间处的<code>qpm</code>为10。示意图如下</li>
+</ul>
+<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/instant_queries%E5%92%8Crange_vector_selector.bmp" class="" title="instant_queries和range_vector_selector">
+
+<h3 id="3-3-Range-queries-Instant-vector-selectors"><a href="#3-3-Range-queries-Instant-vector-selectors" class="headerlink" title="3.3. Range queries + Instant vector selectors"></a>3.3. <code>Range queries</code> + <code>Instant vector selectors</code></h3><ul>
+<li>查询区间为<code>[0, 90]s</code>,<code>step</code>参数为30s</li>
+<li>查询语句直接为<code>http_request</code><br>查询结果为<code>1(0s), 9(30s), 17(60s), 30(90s)</code>。如下图所示<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/range_queries%E5%92%8Cinstant_vector_selector.bmp" class="" title="range_queries和instant_vector_selector">
+
+</li>
+</ul>
+<h3 id="3-4-Range-queries-Range-vector-selectors"><a href="#3-4-Range-queries-Range-vector-selectors" class="headerlink" title="3.4. Range queries + Range vector selectors"></a>3.4. <code>Range queries</code> + <code>Range vector selectors</code></h3><ul>
+<li>查询区间为<code>[0, 90]s</code>,<code>step</code>参数为30s</li>
+<li>查询语句直接为<code>http_request[15s]</code><br>查询结果为<code>[1(0s)], [7(15s),9(30s)], [15(45s),17(60s)], [23(75s),30(90s)]</code>如下图所示。<code>Range vector selectors</code>的计算结果无法直接用于作图，需要使用函数对其进行计算才能进行图像绘制。例如使用<code>increase</code>函数，结果为<code>空, 2, 2, 7</code>，空是因为第一组数据只有一个数<code>increase</code>函数无法计算。<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/range_queries%E5%92%8Crange_vector_selector.bmp" class="" title="range_queries和range_vector_selector">
+
+</li>
+</ul>
+<h2 id="4-Grafana中的图像展示"><a href="#4-Grafana中的图像展示" class="headerlink" title="4. Grafana中的图像展示"></a>4. <code>Grafana</code>中的图像展示</h2><p>Grafana中Prometheus的参数如下所示，其中Interval 乘以 Resolution（显示精度）就是 Prometheus参数。</p>
+<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/Grafana%E4%B8%ADPrometheus%E5%8F%82%E6%95%B0.bmp" class="" title="Grafana中Prometheus参数">
+<p>ps: 可通过Query inspector查看具体的step</p>
+<h2 id="5-参考"><a href="#5-参考" class="headerlink" title="5. 参考"></a>5. 参考</h2><p><a href="https://prometheus.io/docs/introduction/overview/" target="_blank" rel="noopener">Prometheus官方文档</a><br><a href="https://grafana.com/docs/grafana/latest/" target="_blank" rel="noopener">Grafana文档</a><br><a href="https://segmentfault.com/a/1190000017553625" target="_blank" rel="noopener">详解Prometheus range query中的step参数</a></p>
 
       
     </div>
+    
+    
+    
 
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E6%99%AE%E7%BD%97%E7%B1%B3%E4%BF%AE%E6%96%AF/" rel="tag"># 普罗米修斯</a>
+          
+            <a href="/tags/Grafana/" rel="tag"># Grafana</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/07/29/%E6%99%AE%E7%BD%97%E7%B1%B3%E4%BF%AE%E6%96%AF%E4%B9%8B%E5%85%A5%E9%97%A8/" rel="next" title="普罗米修斯之入门">
+                <i class="fa fa-chevron-left"></i> 普罗米修斯之入门
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
   
   
+  </article>
 
-  
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -334,6 +525,10 @@
 
 
           
+
+  
+
+
 
         </div>
         
@@ -354,8 +549,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -429,6 +633,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-前序"><span class="nav-number">1.</span> <span class="nav-text">1. 前序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-PromQL所操作的对象"><span class="nav-number">2.</span> <span class="nav-text">2. PromQL所操作的对象</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Instant-Range-queries和Instant-Range-vector-selectors"><span class="nav-number">3.</span> <span class="nav-text">3. Instant/Range queries和Instant/Range vector selectors</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-Instant-queries-Instant-vector-selectors"><span class="nav-number">3.1.</span> <span class="nav-text">3.1. Instant queries + Instant vector selectors</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-Instant-queries-Range-vector-selectors"><span class="nav-number">3.2.</span> <span class="nav-text">3.2. Instant queries + Range vector selectors</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-Range-queries-Instant-vector-selectors"><span class="nav-number">3.3.</span> <span class="nav-text">3.3. Range queries + Instant vector selectors</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-4-Range-queries-Range-vector-selectors"><span class="nav-number">3.4.</span> <span class="nav-text">3.4. Range queries + Range vector selectors</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-Grafana中的图像展示"><span class="nav-number">4.</span> <span class="nav-text">4. Grafana中的图像展示</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-参考"><span class="nav-number">5.</span> <span class="nav-text">5. 参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -569,6 +789,10 @@
 
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
