@@ -7,12 +7,12 @@ tags:
 categories: C++语言
 ---
 
-### 简介  
+### 1. 简介  
 
 `Barton-Nackman`技巧是通过传递自己本身作为模板参数, 在模板中实现一些依赖于派生类的方法,从而减少了派生类的代码量
 <!-- more -->
 
-### 代码示意
+### 2. 代码示意
 
 ``` cpp
 template<typename Derived> class less_than{
@@ -48,7 +48,7 @@ public:
     (a >= b); //work well
 ```
 
-### 如何使用
+### 3. 如何使用
 
 `boost/operators.hpp`中提供了很多这样的模板类,包含该头文件,然后自己类继承即可.
 

@@ -7,10 +7,10 @@ tags:
 categories: linux命令
 ---
 
-### 简介
+### 1. 简介
 `awk`是一个用于处理文本的强大工具,取名为三位创始人`Alfred Aho，Peter  Weinberger`, 和 `Brian Kernighan` 的 `Family Name `的首字符。
 <!-- more -->
-### 基本语法
+### 2. 基本语法
 `akw [options] 'awk programa' inputfile`  
 或  
 ` akw [options] -f 'awk programa file' inputfile`   
@@ -18,11 +18,11 @@ categories: linux命令
 `awk programa`是指`awk`的命令,构成为  
 `pattern {action}`,`pattern`是正则表达式使用`/`包裹起来,如`/regular-expression/`,然后以行为单位对满足条件的行执行`action`操作.
 
-### 常用`option`   
+### 3. 常用`option`   
 
 `-F`:指定文件的分隔符,默认为空格或者`tab` ;`awk`将文本的一行以分隔符分割成多个域`$0`指整行,`$1,$2...`分别指第二列,第三列等.  
 
-### 例子
+### 4. 例子
 假设文件`mail-list`内容为 ： 
 ```
 Amelia       555-5553     amelia.zodiacusque@gmail.com    F
