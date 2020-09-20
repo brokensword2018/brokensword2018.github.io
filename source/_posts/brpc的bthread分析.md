@@ -60,11 +60,17 @@ bthread主要接口函数和一些实现类构成。比较重要的类有两个�
 3. `TaskControl::init`:创建worker线程。
 4. `TaskGroup* g = c->choose_one_group()`:随机选择一个`TaskGroup`。
 5. `ready_to_run_remote`:将该bthread加入到worker线程的调度队列中。
+
 ### 5.2. `run_main_task`时序图
 {% asset_img run_main_task时序图.bmp run_main_task时序图 %}
 1. `wait_task(&tid)`:调度一个可执行的bthread,可能会从其他worker偷取bthread。
 2. ` TaskGroup::sched_to(&dummy, tid)`:调度指定bthread执行。
 3. `jump_stack(cur_meta->stack, next_meta->stack);`:切换用户态的栈。
+
+## 6. 参考
+[brpc的bthread解读](https://cloud.tencent.com/developer/article/1609731)
+[高性能RPC框架BRPC核心机制分析<一>](https://zhuanlan.zhihu.com/p/113427004)
+[apache/incubator-brpc](https://github.com/apache/incubator-brpc/tree/a2f294e99e48cfe62d542ed4f0bd22998c426afc)
 
 
 
