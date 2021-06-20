@@ -21,65 +21,6 @@
       </tags>
   </entry>
   <entry>
-    <title>什么是内存屏障</title>
-    <url>/2021/06/14/%E4%BB%80%E4%B9%88%E6%98%AF%E5%86%85%E5%AD%98%E5%B1%8F%E9%9A%9C/</url>
-    <content><![CDATA[<p>文章结构见目录  </p>
-<h3 id="1-什么是内存屏障？，为什么需要内存屏障？"><a href="#1-什么是内存屏障？，为什么需要内存屏障？" class="headerlink" title="1.什么是内存屏障？，为什么需要内存屏障？"></a>1.什么是内存屏障？，为什么需要内存屏障？</h3><p>首先，为了性能<strong>编译器和处理器都会对指令进行重排序</strong>。  </p>
-<ul>
-<li>什么是内存屏障：<strong>内存屏障是一条指令，该指令可以对编译器（软件）和处理器（硬件）的指令重排做出一定的限制</strong>，比如，一条内存屏障指令可以禁止编译器和处理器将其后面的指令移到内存屏障指令之前。  <a id="more"></a>  </li>
-<li>为什么需要内存屏障：<strong>编译器和处理器指令重排只能保证在单线程执行下逻辑正确，在多个线程同时读写多个变量的情况下，如果不对指令重排作出一定限制，代码的执行结果会根据指令重排后的顺序产生不同的结果</strong>。指令重排后的顺序每次执行时都可能不一样，显然我们希望我们的代码执行结果与代码顺序是逻辑一致的（可能不太准确），所以我们需要内存屏障。比如。</li>
-</ul>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span>  DRINK_TEA        0</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span>  PASS_CLASSROOM   1</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span>  LEAVE_CLASSROOM  2</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="built_in">std</span>::atomic&lt;<span class="keyword">int</span>&gt; teacher_state(DRINK_TEA);</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="built_in">std</span>::atomic&lt;<span class="keyword">int</span>&gt; cat_state(DRINK_TEA);</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="built_in">std</span>::atomic&lt;<span class="keyword">int</span>&gt; your_state;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="comment">// thread1                                                                   </span></span></pre></td></tr><tr><td class="code"><pre><span class="line">teacher_state.store(PASS_CLASSROOM, <span class="built_in">std</span>::memory_order_relaxed); <span class="comment">// A      </span></span></pre></td></tr><tr><td class="code"><pre><span class="line">cat_state.store(PASS_CLASSROOM, <span class="built_in">std</span>::memory_order_relaxed);  <span class="comment">// B</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="comment">// thread2</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (cat_state.load(<span class="built_in">std</span>::memory_order_relaxed) == PASS_CLASSROOM) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    your_state.store(LEAVE_CLASSROOM, <span class="built_in">std</span>::memory_order_relaxed);</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
-<p><code>std::memory_order_relaxed</code>：表面该原子操作不携带任何内存屏障。<br>上面例子做的事情为：</p>
-<ul>
-<li>thread1:首先老师经过教室，然后猫经过教室。</li>
-<li>thread2:检查猫是否经过了教室，如果猫经过了教室，那你就逃课。</li>
-</ul>
-<p>在指令不重排的情况下，是ok的。你逃课之后不会被老师发现（不鼓励-_-）。但是如果指令重排把B排在了A前面。当你发现猫经过教室的时候，你离开教室，然后老师经过教室。这显然是不期望发生的。所以我们可以把A改为：</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">teacher_state.store(PASS_CLASSROOM, <span class="built_in">std</span>::memory_order_acquire); <span class="comment">// A</span></span></pre></td></tr></table></figure>
-<p><code>std::memory_order_acquire</code>:表明A指令之后的读写指令都不可以重排到A指令之前。即B不会发生在A，那么就可以安全的逃课了。</p>
-<h3 id="2-锁与原子操作"><a href="#2-锁与原子操作" class="headerlink" title="2. 锁与原子操作"></a>2. 锁与原子操作</h3><h4 id="2-1-锁的实现"><a href="#2-1-锁的实现" class="headerlink" title="2.1 锁的实现"></a>2.1 锁的实现</h4><p>自旋锁实现伪代码：</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SpinLock</span> &#123;</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    atomic&lt;<span class="keyword">int</span>&gt; lock_state_(<span class="number">0</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    lock() &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="comment">// step1. 对原子变量进行CAS操作</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">int</span> expected = <span class="number">0</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">while</span> (!lock_state_.compare_exchange_strong(expected, <span class="number">1</span>, <span class="built_in">std</span>::memory_order_acq_rel))</span></pre></td></tr><tr><td class="code"><pre><span class="line">            ;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="comment">// 获取锁成功</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="comment">// step2. 加上内存屏障指令，使得临界区的指令不会跑到临界区外面去</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">        __sync_synchronize(); <span class="comment">// 内存屏障指令，与编译器实现，不同平台指令不同。</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    unlock() &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="comment">// step1. 加上内存屏障指令，使得临界区的指令不会跑到临界区外面去</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">         __sync_synchronize();</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">         <span class="comment">// step2.将原子变量设置为0</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">         lock_state_ = <span class="number">0</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;;</span></pre></td></tr></table></figure>
-<p>互斥锁实现伪代码：</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SleepLock</span> &#123;</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">bool</span> _locked;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    SpinLock _spin_lock;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    lock() &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        _spin_lock.lock();</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">while</span> (_locked)</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            sleep(&amp;_spin_lock); <span class="comment">// 1. 释放_spin_lock并陷入内核放弃cpu执行权</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">                                <span class="comment">// 2. 被唤醒时会重新获得_spin_lock</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        _locked = <span class="literal">true</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        _spin_lock.unlock();</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    unlock() &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        _spin_lock.lock();</span></pre></td></tr><tr><td class="code"><pre><span class="line">        _locked = <span class="literal">false</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        wakeup(&amp;_spin_lock); <span class="comment">// 唤醒等待在该锁上的其他线程</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">        _spin_lock.unlock();</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;;</span></pre></td></tr></table></figure>
-<p>注释较为丰富，不做详细解释。</p>
-<h4 id="2-2-锁与原子操作的区别、关系"><a href="#2-2-锁与原子操作的区别、关系" class="headerlink" title="2.2 锁与原子操作的区别、关系"></a>2.2 锁与原子操作的区别、关系</h4><ul>
-<li>锁的实现依赖于原子操作指令</li>
-<li>锁的实现需要内存屏障保证临界区指令不跑出临界区，该内存屏障为最严格的内存屏障，任何指令都不可以越过该内存屏障</li>
-<li>自旋锁在获取锁的时候，如果获取失败会一直尝试，在锁竞争不严重时效率较高</li>
-<li>互斥锁在获取锁失败的时候会<code>sleep</code>,陷入内核；在锁竞争严重是，线程会频繁在内核态与用户态切换，非常影响性能。</li>
-<li>在使用锁时提高性能主要是两点：  <ol>
-<li>减少锁竞争</li>
-<li>缩小临界区 </li>
-</ol>
-</li>
-</ul>
-<h3 id="3-C-的6中memory-order"><a href="#3-C-的6中memory-order" class="headerlink" title="3. C++的6中memory order"></a>3. <code>C++</code>的6中memory order</h3><p>6种memory order或者说成6种内存屏障。理论上只要有一种内存屏障就够了,即所有该内存屏障之前的指令不可以重排到内存屏障之后，所有该内存屏障之后的指令不可以排到内存屏障之前，但这种内存屏障太严格了，有时候部分指令越过内存屏障对逻辑正确性无影响，同时又能提高性能。针对这种情况，c++在原子变量的操作中提供了6中内存屏障供开发人员自由选择：  </p>
-<ul>
-<li><code>memory_order_relaxed</code>： 无内存屏障语义，只保证该操作的原子性。</li>
-<li><code>memory_order_consume</code>： <code>load</code>方法使用该内存屏障，内存屏障后面的所有依赖该操作的指令都不可以重排到该内存屏障前面。<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">a.load(<span class="built_in">std</span>::memory_order_consume);</span></pre></td></tr><tr><td class="code"><pre><span class="line">b = a;    <span class="comment">// 该指令依赖a的值，所以在该内存屏障语义下，不允许重排到该指令前面</span></span></pre></td></tr></table></figure></li>
-<li><code>memory_order_acquire</code>： <code>load</code>方法使用该内存屏障，比<code>memory_order_consume</code>更严格，内存屏障后面的所有读写指令都不可以重排到该内存屏障前面。</li>
-<li><code>memory_order_release</code>： <code>store</code>方法使用该内存屏障，内存屏障前面的所有读写指令都不可以重排到该内存屏障后面,经常像下面这样搭配使用。  <ol>
-<li>线程1使用<code>memory_order_release</code>， 线程2使用 <code>memory_order_acquire</code>， 构成<code>Release-Acquire ordering</code></li>
-<li>线程1使用<code>memory_order_release</code>， 线程2使用 <code>memory_order_consume</code>， 构成<code>Release-Consume ordering</code></li>
-</ol>
-</li>
-<li><code>memory_order_acq_rel</code>：<code>compare_exchange_strong</code>等<code>read-modify-write</code>使用该内存屏障，同时具有<code>memory_order_acquire</code> 和 <code>memory_order_release</code>语义。</li>
-<li><code>memory_order_seq_cst</code>：<code>load</code>方法使用该内存屏障具有<code>memory_order_acquire</code>语义；<code>store</code>方法使用该内存屏障，具有<code>memory_order_release</code>语义。<code>read-modify-write</code>类型操作如（<code>compare_exchange_strong</code>）使用该内存屏障具有<code>memory_order_acq_rel</code>语义。</li>
-</ul>
-<h3 id="4-参考资料"><a href="#4-参考资料" class="headerlink" title="4.参考资料"></a>4.参考资料</h3><ol>
-<li><a href="https://en.cppreference.com/w/cpp/atomic/memory_order" target="_blank" rel="noopener">std::memory_order cppreference.com</a></li>
-</ol>
-]]></content>
-      <categories>
-        <category>并发编程</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>并发编程</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>brpc的bthread分析</title>
     <url>/2020/09/20/brpc%E7%9A%84bthread%E5%88%86%E6%9E%90/</url>
     <content><![CDATA[<h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h2><p>brpc是百度开源的一款rpc框架，因其高性能、扩展性强、在其基础上进行二次开发，可定制性强；国内许多公司有在使用该框架。brpc使用的是一个M:N的协程模型(bthread)，本文简单介绍一下这个模型。</p>
@@ -145,6 +86,65 @@ Samuel       555-3430     samuel.lanceolis@shu.edu        A</code></pre><p><code
       </categories>
       <tags>
         <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>什么是内存屏障</title>
+    <url>/2021/06/14/%E4%BB%80%E4%B9%88%E6%98%AF%E5%86%85%E5%AD%98%E5%B1%8F%E9%9A%9C/</url>
+    <content><![CDATA[<p>文章结构见目录  </p>
+<h3 id="1-什么是内存屏障？，为什么需要内存屏障？"><a href="#1-什么是内存屏障？，为什么需要内存屏障？" class="headerlink" title="1.什么是内存屏障？，为什么需要内存屏障？"></a>1.什么是内存屏障？，为什么需要内存屏障？</h3><p>首先，为了性能<strong>编译器和处理器都会对指令进行重排序</strong>。  </p>
+<ul>
+<li>什么是内存屏障：<strong>内存屏障是一条指令，该指令可以对编译器（软件）和处理器（硬件）的指令重排做出一定的限制</strong>，比如，一条内存屏障指令可以禁止编译器和处理器将其后面的指令移到内存屏障指令之前。  <a id="more"></a>  </li>
+<li>为什么需要内存屏障：<strong>编译器和处理器指令重排只能保证在单线程执行下逻辑正确，在多个线程同时读写多个变量的情况下，如果不对指令重排作出一定限制，代码的执行结果会根据指令重排后的顺序产生不同的结果</strong>。指令重排后的顺序每次执行时都可能不一样，显然我们希望我们的代码执行结果与代码顺序是逻辑一致的（可能不太准确），所以我们需要内存屏障。比如。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span>  DRINK_TEA        0</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span>  PASS_CLASSROOM   1</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span>  LEAVE_CLASSROOM  2</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="built_in">std</span>::atomic&lt;<span class="keyword">int</span>&gt; teacher_state(DRINK_TEA);</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="built_in">std</span>::atomic&lt;<span class="keyword">int</span>&gt; cat_state(DRINK_TEA);</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="built_in">std</span>::atomic&lt;<span class="keyword">int</span>&gt; your_state;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="comment">// thread1                                                                   </span></span></pre></td></tr><tr><td class="code"><pre><span class="line">teacher_state.store(PASS_CLASSROOM, <span class="built_in">std</span>::memory_order_relaxed); <span class="comment">// A      </span></span></pre></td></tr><tr><td class="code"><pre><span class="line">cat_state.store(PASS_CLASSROOM, <span class="built_in">std</span>::memory_order_relaxed);  <span class="comment">// B</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="comment">// thread2</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (cat_state.load(<span class="built_in">std</span>::memory_order_relaxed) == PASS_CLASSROOM) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    your_state.store(LEAVE_CLASSROOM, <span class="built_in">std</span>::memory_order_relaxed);</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+<p><code>std::memory_order_relaxed</code>：表面该原子操作不携带任何内存屏障。<br>上面例子做的事情为：</p>
+<ul>
+<li>thread1:首先老师经过教室，然后猫经过教室。</li>
+<li>thread2:检查猫是否经过了教室，如果猫经过了教室，那你就逃课。</li>
+</ul>
+<p>在指令不重排的情况下，是ok的。你逃课之后不会被老师发现（不鼓励-_-）。但是如果指令重排把B排在了A前面。当你发现猫经过教室的时候，你离开教室，然后老师经过教室。这显然是不期望发生的。所以我们可以把A改为：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">teacher_state.store(PASS_CLASSROOM, <span class="built_in">std</span>::memory_order_acquire); <span class="comment">// A</span></span></pre></td></tr></table></figure>
+<p><code>std::memory_order_acquire</code>:表明A指令之后的读写指令都不可以重排到A指令之前。即B不会发生在A，那么就可以安全的逃课了。</p>
+<h3 id="2-锁与原子操作"><a href="#2-锁与原子操作" class="headerlink" title="2. 锁与原子操作"></a>2. 锁与原子操作</h3><h4 id="2-1-锁的实现"><a href="#2-1-锁的实现" class="headerlink" title="2.1 锁的实现"></a>2.1 锁的实现</h4><p>自旋锁实现伪代码：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SpinLock</span> &#123;</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    atomic&lt;<span class="keyword">int</span>&gt; lock_state_(<span class="number">0</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    lock() &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="comment">// step1. 对原子变量进行CAS操作</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">int</span> expected = <span class="number">0</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">while</span> (!lock_state_.compare_exchange_strong(expected, <span class="number">1</span>, <span class="built_in">std</span>::memory_order_acq_rel))</span></pre></td></tr><tr><td class="code"><pre><span class="line">            ;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="comment">// 获取锁成功</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="comment">// step2. 加上内存屏障指令，使得临界区的指令不会跑到临界区外面去</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">        __sync_synchronize(); <span class="comment">// 内存屏障指令，与编译器实现，不同平台指令不同。</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    unlock() &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="comment">// step1. 加上内存屏障指令，使得临界区的指令不会跑到临界区外面去</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">         __sync_synchronize();</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">         <span class="comment">// step2.将原子变量设置为0</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">         lock_state_ = <span class="number">0</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;;</span></pre></td></tr></table></figure>
+<p>互斥锁实现伪代码：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SleepLock</span> &#123;</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">bool</span> _locked;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    SpinLock _spin_lock;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    lock() &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        _spin_lock.lock();</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">while</span> (_locked)</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            sleep(&amp;_spin_lock); <span class="comment">// 1. 释放_spin_lock并陷入内核放弃cpu执行权</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">                                <span class="comment">// 2. 被唤醒时会重新获得_spin_lock</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        _locked = <span class="literal">true</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        _spin_lock.unlock();</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    unlock() &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        _spin_lock.lock();</span></pre></td></tr><tr><td class="code"><pre><span class="line">        _locked = <span class="literal">false</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        wakeup(&amp;_spin_lock); <span class="comment">// 唤醒等待在该锁上的其他线程</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">        _spin_lock.unlock();</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;;</span></pre></td></tr></table></figure>
+<p>注释较为丰富，不做详细解释。</p>
+<h4 id="2-2-锁与原子操作的区别、关系"><a href="#2-2-锁与原子操作的区别、关系" class="headerlink" title="2.2 锁与原子操作的区别、关系"></a>2.2 锁与原子操作的区别、关系</h4><ul>
+<li>锁的实现依赖于原子操作指令</li>
+<li>锁的实现需要内存屏障保证临界区指令不跑出临界区，该内存屏障为最严格的内存屏障，任何指令都不可以越过该内存屏障</li>
+<li>自旋锁在获取锁的时候，如果获取失败会一直尝试，在锁竞争不严重时效率较高</li>
+<li>互斥锁在获取锁失败的时候会<code>sleep</code>,陷入内核；在锁竞争严重是，线程会频繁在内核态与用户态切换，非常影响性能。</li>
+<li>在使用锁时提高性能主要是两点：  <ol>
+<li>减少锁竞争</li>
+<li>缩小临界区 </li>
+</ol>
+</li>
+</ul>
+<h3 id="3-C-的6中memory-order"><a href="#3-C-的6中memory-order" class="headerlink" title="3. C++的6中memory order"></a>3. <code>C++</code>的6中memory order</h3><p>6种memory order或者说成6种内存屏障。理论上只要有一种内存屏障就够了,即所有该内存屏障之前的指令不可以重排到内存屏障之后，所有该内存屏障之后的指令不可以排到内存屏障之前，但这种内存屏障太严格了，有时候部分指令越过内存屏障对逻辑正确性无影响，同时又能提高性能。针对这种情况，c++在原子变量的操作中提供了6中内存屏障供开发人员自由选择：  </p>
+<ul>
+<li><code>memory_order_relaxed</code>： 无内存屏障语义，只保证该操作的原子性。</li>
+<li><code>memory_order_consume</code>： <code>load</code>方法使用该内存屏障，内存屏障后面的所有依赖该操作的指令都不可以重排到该内存屏障前面。<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">a.load(<span class="built_in">std</span>::memory_order_consume);</span></pre></td></tr><tr><td class="code"><pre><span class="line">b = a;    <span class="comment">// 该指令依赖a的值，所以在该内存屏障语义下，不允许重排到该指令前面</span></span></pre></td></tr></table></figure></li>
+<li><code>memory_order_acquire</code>： <code>load</code>方法使用该内存屏障，比<code>memory_order_consume</code>更严格，内存屏障后面的所有读写指令都不可以重排到该内存屏障前面。</li>
+<li><code>memory_order_release</code>： <code>store</code>方法使用该内存屏障，内存屏障前面的所有读写指令都不可以重排到该内存屏障后面,经常像下面这样搭配使用。  <ol>
+<li>线程1使用<code>memory_order_release</code>， 线程2使用 <code>memory_order_acquire</code>， 构成<code>Release-Acquire ordering</code></li>
+<li>线程1使用<code>memory_order_release</code>， 线程2使用 <code>memory_order_consume</code>， 构成<code>Release-Consume ordering</code></li>
+</ol>
+</li>
+<li><code>memory_order_acq_rel</code>：<code>compare_exchange_strong</code>等<code>read-modify-write</code>使用该内存屏障，同时具有<code>memory_order_acquire</code> 和 <code>memory_order_release</code>语义。</li>
+<li><code>memory_order_seq_cst</code>：<code>load</code>方法使用该内存屏障具有<code>memory_order_acquire</code>语义；<code>store</code>方法使用该内存屏障，具有<code>memory_order_release</code>语义。<code>read-modify-write</code>类型操作如（<code>compare_exchange_strong</code>）使用该内存屏障具有<code>memory_order_acq_rel</code>语义。</li>
+</ul>
+<h3 id="4-参考资料"><a href="#4-参考资料" class="headerlink" title="4.参考资料"></a>4.参考资料</h3><ol>
+<li><a href="https://en.cppreference.com/w/cpp/atomic/memory_order" target="_blank" rel="noopener">std::memory_order cppreference.com</a></li>
+</ol>
+]]></content>
+      <categories>
+        <category>并发编程</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>并发编程</tag>
       </tags>
   </entry>
   <entry>
