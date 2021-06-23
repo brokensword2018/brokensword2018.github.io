@@ -1,26 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Barton-Nackman 技巧</title>
-    <url>/2019/12/24/Barton-Nackman-%E6%8A%80%E5%B7%A7/</url>
-    <content><![CDATA[<h3 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h3><p><code>Barton-Nackman</code>技巧是通过传递自己本身作为模板参数, 在模板中实现一些依赖于派生类的方法,从而减少了派生类的代码量</p>
-<a id="more"></a>
-
-<h3 id="2-代码示意"><a href="#2-代码示意" class="headerlink" title="2. 代码示意"></a>2. 代码示意</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> Derived&gt; <span class="class"><span class="keyword">class</span> <span class="title">less_than</span>&#123;</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">public</span>:</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="comment">//通过小于符号定义其他符号,例如大于,大于等于等</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">friend</span> <span class="keyword">bool</span> <span class="keyword">operator</span> &gt;(<span class="keyword">const</span> Derived&amp; lhs, <span class="keyword">const</span> Derived&amp; rhs)&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">return</span> rhs &lt; lhs;    </span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">friend</span> <span class="keyword">bool</span> <span class="keyword">operator</span> &gt;=(<span class="keyword">const</span> Derived&amp; lhs, <span class="keyword">const</span> Derived&amp; rhs)&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">return</span> !(lhs &lt; rhs);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    </span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;;</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="comment">//这个类需要自己定义小于符号,然后通过继承less_than,可以自动生成大于符号</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SomeClass</span> :</span> <span class="keyword">public</span> less_than&lt;SomeClass&gt;&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">public</span>:</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">int</span> value_;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    SomeClass(<span class="keyword">int</span> value) : value_(value) &#123; &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">friend</span> <span class="keyword">bool</span> <span class="keyword">operator</span> &lt;(<span class="keyword">const</span> SomeClass&amp; lhs, <span class="keyword">const</span> SomeClass&amp; rhs)&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">return</span> lhs.value_ &lt; rhs.value_;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;  </span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;;</span></pre></td></tr></table></figure>
-<p>测试代码:</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function">SomeClass <span class="title">a</span><span class="params">(<span class="number">1</span>)</span></span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="function">SomeClass <span class="title">b</span><span class="params">(<span class="number">2</span>)</span></span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">(a &lt; b);</span></pre></td></tr><tr><td class="code"><pre><span class="line">(a &gt; b); <span class="comment">//work well</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">(a &gt;= b); <span class="comment">//work well</span></span></pre></td></tr></table></figure>
-
-<h3 id="3-如何使用"><a href="#3-如何使用" class="headerlink" title="3. 如何使用"></a>3. 如何使用</h3><p><code>boost/operators.hpp</code>中提供了很多这样的模板类,包含该头文件,然后自己类继承即可.</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">less_than_comparable : 派生类提供小于,自动生成 &gt; , &gt;= , &lt;=</span></pre></td></tr><tr><td class="code"><pre><span class="line">equality_comparable : 派生类提供等于, 自动生成 !=</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"> class MyOwnClass : <span class="keyword">public</span> less_than_comparable&lt;MyOwnClass&gt;&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">public</span>:</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="comment">//实现小于符号,该类会自动生成 &lt;=, &gt;, &gt;=</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">friend</span> <span class="keyword">bool</span> <span class="keyword">operator</span> &lt;(<span class="keyword">const</span> SomeClass&amp; lhs, <span class="keyword">const</span> SomeClass&amp; rhs);</span></pre></td></tr><tr><td class="code"><pre><span class="line"> &#125;;</span></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>C++语言</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Boost</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>brpc的bthread分析</title>
     <url>/2020/09/20/brpc%E7%9A%84bthread%E5%88%86%E6%9E%90/</url>
     <content><![CDATA[<h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h2><p>brpc是百度开源的一款rpc框架，因其高性能、扩展性强、在其基础上进行二次开发，可定制性强；国内许多公司有在使用该框架。brpc使用的是一个M:N的协程模型(bthread)，本文简单介绍一下这个模型。</p>
@@ -68,24 +48,23 @@
       </tags>
   </entry>
   <entry>
-    <title>linux命令 awk</title>
-    <url>/2020/07/19/linux%E5%91%BD%E4%BB%A4-awk/</url>
-    <content><![CDATA[<h3 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h3><p><code>awk</code>是一个用于处理文本的强大工具,取名为三位创始人<code>Alfred Aho，Peter  Weinberger</code>, 和 <code>Brian Kernighan</code> 的 <code>Family Name</code>的首字符。</p>
+    <title>Barton-Nackman 技巧</title>
+    <url>/2019/12/24/Barton-Nackman-%E6%8A%80%E5%B7%A7/</url>
+    <content><![CDATA[<h3 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h3><p><code>Barton-Nackman</code>技巧是通过传递自己本身作为模板参数, 在模板中实现一些依赖于派生类的方法,从而减少了派生类的代码量</p>
 <a id="more"></a>
-<h3 id="2-基本语法"><a href="#2-基本语法" class="headerlink" title="2. 基本语法"></a>2. 基本语法</h3><p><code>akw [options] &#39;awk programa&#39; inputfile</code><br>或<br><code>akw [options] -f &#39;awk programa file&#39; inputfile</code>   </p>
-<p><code>awk programa</code>是指<code>awk</code>的命令,构成为<br><code>pattern {action}</code>,<code>pattern</code>是正则表达式使用<code>/</code>包裹起来,如<code>/regular-expression/</code>,然后以行为单位对满足条件的行执行<code>action</code>操作.</p>
-<h3 id="3-常用option"><a href="#3-常用option" class="headerlink" title="3. 常用option"></a>3. 常用<code>option</code></h3><p><code>-F</code>:指定文件的分隔符,默认为空格或者<code>tab</code> ;<code>awk</code>将文本的一行以分隔符分割成多个域<code>$0</code>指整行,<code>$1,$2...</code>分别指第二列,第三列等.  </p>
-<h3 id="4-例子"><a href="#4-例子" class="headerlink" title="4. 例子"></a>4. 例子</h3><p>假设文件<code>mail-list</code>内容为 ： </p>
-<pre><code>Amelia       555-5553     amelia.zodiacusque@gmail.com    F
-Broderick    555-0542     broderick.aliquotiens@yahoo.com R
-Julie        555-6699     julie.perscrutabor@skeeve.com   F
-Samuel       555-3430     samuel.lanceolis@shu.edu        A</code></pre><p><code>awk &#39;/Julie/ {print $1,$3}&#39; mail-list</code>命令就是匹配存在<code>Julie</code>的行,然后打印出该行的第一列和第三列,注意要在<code>$1</code>和<code>$1</code>之间添加逗号,不然第一列和第三列的打印结果会连在一起.</p>
-]]></content>
+
+<h3 id="2-代码示意"><a href="#2-代码示意" class="headerlink" title="2. 代码示意"></a>2. 代码示意</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> Derived&gt; <span class="class"><span class="keyword">class</span> <span class="title">less_than</span>&#123;</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">public</span>:</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="comment">//通过小于符号定义其他符号,例如大于,大于等于等</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">friend</span> <span class="keyword">bool</span> <span class="keyword">operator</span> &gt;(<span class="keyword">const</span> Derived&amp; lhs, <span class="keyword">const</span> Derived&amp; rhs)&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">return</span> rhs &lt; lhs;    </span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">friend</span> <span class="keyword">bool</span> <span class="keyword">operator</span> &gt;=(<span class="keyword">const</span> Derived&amp; lhs, <span class="keyword">const</span> Derived&amp; rhs)&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">return</span> !(lhs &lt; rhs);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    </span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;;</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="comment">//这个类需要自己定义小于符号,然后通过继承less_than,可以自动生成大于符号</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SomeClass</span> :</span> <span class="keyword">public</span> less_than&lt;SomeClass&gt;&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">public</span>:</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">int</span> value_;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    SomeClass(<span class="keyword">int</span> value) : value_(value) &#123; &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">friend</span> <span class="keyword">bool</span> <span class="keyword">operator</span> &lt;(<span class="keyword">const</span> SomeClass&amp; lhs, <span class="keyword">const</span> SomeClass&amp; rhs)&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">return</span> lhs.value_ &lt; rhs.value_;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;  </span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;;</span></pre></td></tr></table></figure>
+<p>测试代码:</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function">SomeClass <span class="title">a</span><span class="params">(<span class="number">1</span>)</span></span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="function">SomeClass <span class="title">b</span><span class="params">(<span class="number">2</span>)</span></span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">(a &lt; b);</span></pre></td></tr><tr><td class="code"><pre><span class="line">(a &gt; b); <span class="comment">//work well</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">(a &gt;= b); <span class="comment">//work well</span></span></pre></td></tr></table></figure>
+
+<h3 id="3-如何使用"><a href="#3-如何使用" class="headerlink" title="3. 如何使用"></a>3. 如何使用</h3><p><code>boost/operators.hpp</code>中提供了很多这样的模板类,包含该头文件,然后自己类继承即可.</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">less_than_comparable : 派生类提供小于,自动生成 &gt; , &gt;= , &lt;=</span></pre></td></tr><tr><td class="code"><pre><span class="line">equality_comparable : 派生类提供等于, 自动生成 !=</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"> class MyOwnClass : <span class="keyword">public</span> less_than_comparable&lt;MyOwnClass&gt;&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">public</span>:</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="comment">//实现小于符号,该类会自动生成 &lt;=, &gt;, &gt;=</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">friend</span> <span class="keyword">bool</span> <span class="keyword">operator</span> &lt;(<span class="keyword">const</span> SomeClass&amp; lhs, <span class="keyword">const</span> SomeClass&amp; rhs);</span></pre></td></tr><tr><td class="code"><pre><span class="line"> &#125;;</span></pre></td></tr></table></figure>]]></content>
       <categories>
-        <category>linux命令</category>
+        <category>C++语言</category>
       </categories>
       <tags>
-        <tag>linux</tag>
+        <tag>C++</tag>
+        <tag>Boost</tag>
       </tags>
   </entry>
   <entry>
@@ -211,6 +190,27 @@ Samuel       555-3430     samuel.lanceolis@shu.edu        A</code></pre><p><code
       <tags>
         <tag>普罗米修斯</tag>
         <tag>Grafana</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>linux命令 awk</title>
+    <url>/2020/07/19/linux%E5%91%BD%E4%BB%A4-awk/</url>
+    <content><![CDATA[<h3 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h3><p><code>awk</code>是一个用于处理文本的强大工具,取名为三位创始人<code>Alfred Aho，Peter  Weinberger</code>, 和 <code>Brian Kernighan</code> 的 <code>Family Name</code>的首字符。</p>
+<a id="more"></a>
+<h3 id="2-基本语法"><a href="#2-基本语法" class="headerlink" title="2. 基本语法"></a>2. 基本语法</h3><p><code>akw [options] &#39;awk programa&#39; inputfile</code><br>或<br><code>akw [options] -f &#39;awk programa file&#39; inputfile</code>   </p>
+<p><code>awk programa</code>是指<code>awk</code>的命令,构成为<br><code>pattern {action}</code>,<code>pattern</code>是正则表达式使用<code>/</code>包裹起来,如<code>/regular-expression/</code>,然后以行为单位对满足条件的行执行<code>action</code>操作.</p>
+<h3 id="3-常用option"><a href="#3-常用option" class="headerlink" title="3. 常用option"></a>3. 常用<code>option</code></h3><p><code>-F</code>:指定文件的分隔符,默认为空格或者<code>tab</code> ;<code>awk</code>将文本的一行以分隔符分割成多个域<code>$0</code>指整行,<code>$1,$2...</code>分别指第二列,第三列等.  </p>
+<h3 id="4-例子"><a href="#4-例子" class="headerlink" title="4. 例子"></a>4. 例子</h3><p>假设文件<code>mail-list</code>内容为 ： </p>
+<pre><code>Amelia       555-5553     amelia.zodiacusque@gmail.com    F
+Broderick    555-0542     broderick.aliquotiens@yahoo.com R
+Julie        555-6699     julie.perscrutabor@skeeve.com   F
+Samuel       555-3430     samuel.lanceolis@shu.edu        A</code></pre><p><code>awk &#39;/Julie/ {print $1,$3}&#39; mail-list</code>命令就是匹配存在<code>Julie</code>的行,然后打印出该行的第一列和第三列,注意要在<code>$1</code>和<code>$1</code>之间添加逗号,不然第一列和第三列的打印结果会连在一起.</p>
+]]></content>
+      <categories>
+        <category>linux命令</category>
+      </categories>
+      <tags>
+        <tag>linux</tag>
       </tags>
   </entry>
   <entry>
