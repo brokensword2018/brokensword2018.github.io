@@ -294,6 +294,167 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/08/15/%E5%9F%BA%E4%BA%8Eepoll%E5%92%8Cgetaddrinfo-a%E7%9A%84%E5%BC%82%E6%AD%A5dns%E8%A7%A3%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="brokensword">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/ruiwen.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="brokensword个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/08/15/%E5%9F%BA%E4%BA%8Eepoll%E5%92%8Cgetaddrinfo-a%E7%9A%84%E5%BC%82%E6%AD%A5dns%E8%A7%A3%E6%9E%90/" itemprop="url">基于epoll和getaddrinfo_a的异步dns解析</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-08-15T11:30:31+08:00">
+                2021-08-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index">
+                    <span itemprop="name">网络编程</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2021/08/15/%E5%9F%BA%E4%BA%8Eepoll%E5%92%8Cgetaddrinfo-a%E7%9A%84%E5%BC%82%E6%AD%A5dns%E8%A7%A3%E6%9E%90/" class="leancloud_visitors" data-flag-title="基于epoll和getaddrinfo_a的异步dns解析">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="1-介绍"><a href="#1-介绍" class="headerlink" title="1.介绍"></a>1.介绍</h2><p>多线程程序往往代表了高性能、高并发。但是多线程程序也比较容易导致难以调试的bug。单线程程序逻辑简单，很容易编写bugfree的代码，所以单线程程序；多进程部署也是一个不错的方案。  </p>
+<ul>
+<li>单线程程序中我们需要尽量的避免堵塞操作，因为只有一个线程，堵塞之后整个进程都不工作，很多同步操作都需要进行异步实现。  </li>
+</ul>
+<p><code>gethostbyname</code>的作用为获取域名对应的ip地址，是一个同步操作，容易发生堵塞。本文就linux下基于<code>epoll</code>和<code>getaddrinfo_a</code>实现异步dns解析做一个简单介绍。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2021/08/15/%E5%9F%BA%E4%BA%8Eepoll%E5%92%8Cgetaddrinfo-a%E7%9A%84%E5%BC%82%E6%AD%A5dns%E8%A7%A3%E6%9E%90/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/06/14/%E4%BB%80%E4%B9%88%E6%98%AF%E5%86%85%E5%AD%98%E5%B1%8F%E9%9A%9C/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1280,7 +1441,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-count">7</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1291,7 +1452,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-count">6</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
