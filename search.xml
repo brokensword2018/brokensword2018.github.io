@@ -1,6 +1,171 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>WEBRTC PC demo信令流程</title>
+    <url>/2021/08/21/WEBRTC-PC-demo%E4%BF%A1%E4%BB%A4%E6%B5%81%E7%A8%8B/</url>
+    <content><![CDATA[<p>本文简单介绍WEBRTC PC官方demo的信令流程</p>
+<a id="more"></a>
+
+<h2 id="1-服务架构"><a href="#1-服务架构" class="headerlink" title="1. 服务架构"></a>1. 服务架构</h2><img src="/2021/08/21/WEBRTC-PC-demo%E4%BF%A1%E4%BB%A4%E6%B5%81%E7%A8%8B/pc_demo%E6%9E%B6%E6%9E%84.bmp" class="" title="pc_demo架构">
+
+<p>PC demo的架构如上图所示：</p>
+<ul>
+<li>peerconnection_client A 和 peerconnection_client B是要通信的双方，他们之间建立<code>PeerConnection</code>进行音视频数据的传输。</li>
+<li>peerconnection_server 负责在两个client之间的信令传输，包括<code>SDP</code>和<code>ICE</code>信息。</li>
+</ul>
+<h2 id="2-信令流程"><a href="#2-信令流程" class="headerlink" title="2. 信令流程"></a>2. 信令流程</h2><img src="/2021/08/21/WEBRTC-PC-demo%E4%BF%A1%E4%BB%A4%E6%B5%81%E7%A8%8B/pc_demo%E4%BF%A1%E4%BB%A4%E6%B5%81%E7%A8%8B.bmp" class="" title="pc_demo信令流程">
+
+<p>PC demo的信令流程如上图所示：</p>
+<ol>
+<li>发起方创建本地<code>peerConnection</code>,<code>addTrack</code>。</li>
+<li>创建offer, <code>setLocalDescription</code>,该过程会启动iceCandidate的收集过程。通过信令通道将offer发送给应答方。</li>
+<li>应答方创建<code>peerConnection</code>，创建answer,通过信令通道发送给发起方。</li>
+<li>发起方和应答方通过信令通道交换iceCandidate。</li>
+<li>成功建立连接，进行音视频通话</li>
+</ol>
+]]></content>
+      <categories>
+        <category>音视频</category>
+      </categories>
+      <tags>
+        <tag>WEBRTC</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>brpc的bthread分析</title>
+    <url>/2020/09/20/brpc%E7%9A%84bthread%E5%88%86%E6%9E%90/</url>
+    <content><![CDATA[<h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h2><p>brpc是百度开源的一款rpc框架，因其高性能、扩展性强、在其基础上进行二次开发，可定制性强；国内许多公司有在使用该框架。brpc使用的是一个M:N的协程模型(bthread)，本文简单介绍一下这个模型。</p>
+<a id="more"></a>
+
+<h2 id="2-模型架构"><a href="#2-模型架构" class="headerlink" title="2. 模型架构"></a>2. 模型架构</h2><p>bthread的模型架构如下，M个bthread映射到N个pthread,pthread与内核线程的关系式1:1，bthread实际运行在pthread中，bthread运行一半之后可以放弃pthread资源，再次运行时可能处于不同的pthread.</p>
+<img src="/2020/09/20/brpc%E7%9A%84bthread%E5%88%86%E6%9E%90/bthread%E6%9E%B6%E6%9E%84.bmp" class="" title="bthread架构"> 
+
+<h2 id="3-bthread的简单使用"><a href="#3-bthread的简单使用" class="headerlink" title="3. bthread的简单使用"></a>3. bthread的简单使用</h2><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="keyword">bthread_t</span>&gt; tids;</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; thread_num; ++i) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">if</span> (bthread_start_background(&amp;tids[i], <span class="literal">NULL</span>, myfunc, &amp;myarg) != <span class="number">0</span>) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        LOG(ERROR) &lt;&lt; <span class="string">"Fail to create bthread"</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">     &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; thread_num; ++i) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">     bthread_join(tids[i], <span class="literal">NULL</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+<ul>
+<li><code>bthread_start_background</code>相当于<code>pthread_create</code>,使用函数创建一个bthread.</li>
+<li><code>bthread_join</code>相当于<code>pthread_join</code>等待协程的结束.</li>
+</ul>
+<h2 id="4-bthread的原理"><a href="#4-bthread的原理" class="headerlink" title="4. bthread的原理"></a>4. bthread的原理</h2><p>bthread主要接口函数和一些实现类构成。比较重要的类有两个，<code>TaskControl</code>和<code>TaskGroup</code>在bthread中一个协程也称作一个task.<code>TaskControl</code>负责管理所有的pthread.<code>TaskGroup</code>负责每个pthread的工作。</p>
+<ol>
+<li><p>接口函数：<br><code>bthread_start_urgent</code>:创建一个协程，并立即执行该协程。<br><code>bthread_start_background</code>：创建一个协程，并将其加入调度队列。<br><code>bthread_yield</code>：放弃cpu的执行权，切换到另外的协程执行。</p>
+</li>
+<li><p><code>TaskControl</code>的主要接口<br><code>init</code>:bthread的初始化，其中会调用<code>pthread_create</code>创建工作线程。<br><code>create_group</code>：创建一个<code>TaskGroup</code>对象。<br><code>steal_task</code>：使bthread可以在不同的pthread中进行切换，提高并发度。<br><code>choose_one_group</code>：随机选择一个管理的<code>TaskGroup</code>对象返回。</p>
+</li>
+<li><p><code>TaskGroup</code>的主要接口<br><code>sched_to</code>：切换到某个协程去执行。<br><code>run_main_task</code>：工作线程执行的函数，主要工作为不停的选择不同的bthread并调度执行。</p>
+</li>
+</ol>
+<h2 id="5-函数时序图"><a href="#5-函数时序图" class="headerlink" title="5. 函数时序图"></a>5. 函数时序图</h2><p>本文时序图省略了部分函数，保留整体逻辑。</p>
+<h3 id="5-1-bthread-start-background时序图"><a href="#5-1-bthread-start-background时序图" class="headerlink" title="5.1. bthread_start_background时序图"></a>5.1. <code>bthread_start_background</code>时序图</h3><img src="/2020/09/20/brpc%E7%9A%84bthread%E5%88%86%E6%9E%90/bthread_start_background%E6%97%B6%E5%BA%8F%E5%9B%BE.bmp" class="" title="bthread_start_background时序图">
+<ol>
+<li><code>start_from_non_worker</code>：在不是worker的线程中调用该函数。</li>
+<li><code>TaskControl* c = get_or_new_task_control()</code>:获得<code>TaskControl</code>对象，如果不是第一次执行，就会执行<code>TaskControl::init</code>。</li>
+<li><code>TaskControl::init</code>:创建worker线程。</li>
+<li><code>TaskGroup* g = c-&gt;choose_one_group()</code>:随机选择一个<code>TaskGroup</code>。</li>
+<li><code>ready_to_run_remote</code>:将该bthread加入到worker线程的调度队列中。</li>
+</ol>
+<h3 id="5-2-run-main-task时序图"><a href="#5-2-run-main-task时序图" class="headerlink" title="5.2. run_main_task时序图"></a>5.2. <code>run_main_task</code>时序图</h3><img src="/2020/09/20/brpc%E7%9A%84bthread%E5%88%86%E6%9E%90/run_main_task%E6%97%B6%E5%BA%8F%E5%9B%BE.bmp" class="" title="run_main_task时序图">
+<ol>
+<li><code>wait_task(&amp;tid)</code>:调度一个可执行的bthread,可能会从其他worker偷取bthread。</li>
+<li><code>TaskGroup::sched_to(&amp;dummy, tid)</code>:调度指定bthread执行。</li>
+<li><code>jump_stack(cur_meta-&gt;stack, next_meta-&gt;stack);</code>:切换用户态的栈。</li>
+</ol>
+<h2 id="6-参考"><a href="#6-参考" class="headerlink" title="6. 参考"></a>6. 参考</h2><p><a href="https://cloud.tencent.com/developer/article/1609731" target="_blank" rel="noopener">brpc的bthread解读</a><br><a href="https://zhuanlan.zhihu.com/p/113427004" target="_blank" rel="noopener">高性能RPC框架BRPC核心机制分析&lt;一&gt;</a><br><a href="https://github.com/apache/incubator-brpc/tree/a2f294e99e48cfe62d542ed4f0bd22998c426afc" target="_blank" rel="noopener">apache/incubator-brpc</a></p>
+]]></content>
+      <categories>
+        <category>框架学习</category>
+      </categories>
+      <tags>
+        <tag>-brpc</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>linux命令 awk</title>
+    <url>/2020/07/19/linux%E5%91%BD%E4%BB%A4-awk/</url>
+    <content><![CDATA[<h3 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h3><p><code>awk</code>是一个用于处理文本的强大工具,取名为三位创始人<code>Alfred Aho，Peter  Weinberger</code>, 和 <code>Brian Kernighan</code> 的 <code>Family Name</code>的首字符。</p>
+<a id="more"></a>
+<h3 id="2-基本语法"><a href="#2-基本语法" class="headerlink" title="2. 基本语法"></a>2. 基本语法</h3><p><code>akw [options] &#39;awk programa&#39; inputfile</code><br>或<br><code>akw [options] -f &#39;awk programa file&#39; inputfile</code>   </p>
+<p><code>awk programa</code>是指<code>awk</code>的命令,构成为<br><code>pattern {action}</code>,<code>pattern</code>是正则表达式使用<code>/</code>包裹起来,如<code>/regular-expression/</code>,然后以行为单位对满足条件的行执行<code>action</code>操作.</p>
+<h3 id="3-常用option"><a href="#3-常用option" class="headerlink" title="3. 常用option"></a>3. 常用<code>option</code></h3><p><code>-F</code>:指定文件的分隔符,默认为空格或者<code>tab</code> ;<code>awk</code>将文本的一行以分隔符分割成多个域<code>$0</code>指整行,<code>$1,$2...</code>分别指第二列,第三列等.  </p>
+<h3 id="4-例子"><a href="#4-例子" class="headerlink" title="4. 例子"></a>4. 例子</h3><p>假设文件<code>mail-list</code>内容为 ： </p>
+<pre><code>Amelia       555-5553     amelia.zodiacusque@gmail.com    F
+Broderick    555-0542     broderick.aliquotiens@yahoo.com R
+Julie        555-6699     julie.perscrutabor@skeeve.com   F
+Samuel       555-3430     samuel.lanceolis@shu.edu        A</code></pre><p><code>awk &#39;/Julie/ {print $1,$3}&#39; mail-list</code>命令就是匹配存在<code>Julie</code>的行,然后打印出该行的第一列和第三列,注意要在<code>$1</code>和<code>$1</code>之间添加逗号,不然第一列和第三列的打印结果会连在一起.</p>
+]]></content>
+      <categories>
+        <category>linux命令</category>
+      </categories>
+      <tags>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>从Prometheus的计算规则到Grafana的数据展示</title>
+    <url>/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/</url>
+    <content><![CDATA[<h2 id="1-前序"><a href="#1-前序" class="headerlink" title="1. 前序"></a>1. 前序</h2><p>本文目标为阐释清楚：<strong>一条<code>PromQL</code>在执行过程中发生了什么，从而得到<code>Grafana</code>中的图像</strong></p>
+<a id="more"></a>
+
+<h2 id="2-PromQL所操作的对象"><a href="#2-PromQL所操作的对象" class="headerlink" title="2. PromQL所操作的对象"></a>2. <code>PromQL</code>所操作的对象</h2><p>首先明确</p>
+<ol>
+<li><code>PromQL</code>计算依赖于收集数据的<code>timestamp</code></li>
+<li>收集数据的<code>timestamp</code>是<code>Prometheus server</code>发出<code>GET</code>请求时的时间戳</li>
+<li><code>Prometheus server</code>发出<code>GET</code>请求的时间并不严格符合数据的收集间隔</li>
+</ol>
+<p>ps: <code>timestamp</code>函数可以查看收集上来数据的时间戳<br>接下来对上述第3点做简单解释。</p>
+<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/Prometheus%E7%9A%84GET%E8%AF%B7%E6%B1%82%E6%97%B6%E9%97%B4.jpg" class="" title="Prometheus的GET请求时间">
+
+<p>如上图所示，蓝色的点为按照我们设置的数据收集间隔，<code>GET</code>请求的理论时间，理论时间间隔严格等于设置的收集时间间隔。然而实际上当<code>Prometheus server</code>负载较大时，实际发出<code>GET</code>请求的时间相对于理论时间可能有一定的延迟，如<code>a)</code>所示; 当<code>Prometheus server</code>同时向多个<code>Instance</code>收集数据时，<code>Prometheus server</code>甚至可能将多个<code>GET</code>请求离散分布到收集数据的时间间隔中，如<code>b)</code>所示。</p>
+<h2 id="3-Instant-Range-queries和Instant-Range-vector-selectors"><a href="#3-Instant-Range-queries和Instant-Range-vector-selectors" class="headerlink" title="3. Instant/Range queries和Instant/Range vector selectors"></a>3. <code>Instant/Range queries</code>和<code>Instant/Range vector selectors</code></h2><p><a href="https://prometheus.io/docs/prometheus/latest/querying/basics/" target="_blank" rel="noopener">Instant/Range vector selectors</a>是两种查询语句。</p>
+<ul>
+<li><code>Instant vector selectors</code>：在给定时间处从时间序列中选择出一个样本点</li>
+<li><code>Range vector selectors</code>：从时间序列中选出<code>timestamp</code>在区间<code>[给定时间 - range duration, 给定时间]</code>的样本点</li>
+</ul>
+<p><a href="https://prometheus.io/docs/prometheus/latest/querying/api/" target="_blank" rel="noopener">Instant/Range queries</a>是查询时间的范围的区别。</p>
+<ul>
+<li><code>Instant queries</code>：对某一个时间点进行查询。</li>
+<li><code>Range queries</code>：对某一段时间区间进行查询。<code>step</code>参数是指将查询区间按照<code>step</code>大小的间隔划分得到多个时间点，在这些时间点上使用<code>Instant/Range vector selectors</code>。可以这样理解，<code>Range queries</code>通过<code>step</code>参数转化为了多个<code>Instant queries</code>。假设查询区间为<code>[0, 90]s</code>,<code>step</code>参数为30s,那么该查询就变成了在<code>0s, 30s, 60s, 90s</code>的四次查询。在Grafana中显示横坐标就是时间，纵坐标就是值。Grafana显示变化趋势的图像一定是<code>Range queries</code>。</li>
+</ul>
+<p>假设一个<code>counter</code>类型的统计数据，名字为<code>http_request</code>,它的统计结果如下图所示：</p>
+<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/http_request%E5%81%87%E8%AE%BE%E6%95%B0%E6%8D%AE.bmp" class="" title="http_request假设数据">
+
+<h3 id="3-1-Instant-queries-Instant-vector-selectors"><a href="#3-1-Instant-queries-Instant-vector-selectors" class="headerlink" title="3.1. Instant queries + Instant vector selectors"></a>3.1. <code>Instant queries</code> + <code>Instant vector selectors</code></h3><ul>
+<li>假定查询时间为<code>50s</code></li>
+<li>查询语句直接为<code>http_request</code><br>查询结果为15，如下图所示。<code>Instant vector selectors</code>的查询规则为<strong>向后搜索到第一个时间戳小于等下查询时间的样本点；若搜索距离超过5分钟仍然无样本点，则查询结果为空</strong>。<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/instant_queries%E5%92%8Cinstant_vector_selector.bmp" class="" title="instant_queries和instant_vector_selector">
+
+</li>
+</ul>
+<h3 id="3-2-Instant-queries-Range-vector-selectors"><a href="#3-2-Instant-queries-Range-vector-selectors" class="headerlink" title="3.2. Instant queries + Range vector selectors"></a>3.2. <code>Instant queries</code> + <code>Range vector selectors</code></h3><ul>
+<li>假定查询时间为65s</li>
+<li>查询语句为<code>http_request[1m]</code><br>查询结果为<code>7(15s), 9(30s), 15(45s), 17(60s)</code>。我们可以使用一些函数作用于这些查询结果,例如<code>increase</code>函数，结果为10。表明查询时间处的<code>qpm</code>为10。示意图如下</li>
+</ul>
+<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/instant_queries%E5%92%8Crange_vector_selector.bmp" class="" title="instant_queries和range_vector_selector">
+
+<h3 id="3-3-Range-queries-Instant-vector-selectors"><a href="#3-3-Range-queries-Instant-vector-selectors" class="headerlink" title="3.3. Range queries + Instant vector selectors"></a>3.3. <code>Range queries</code> + <code>Instant vector selectors</code></h3><ul>
+<li>查询区间为<code>[0, 90]s</code>,<code>step</code>参数为30s</li>
+<li>查询语句直接为<code>http_request</code><br>查询结果为<code>1(0s), 9(30s), 17(60s), 30(90s)</code>。如下图所示<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/range_queries%E5%92%8Cinstant_vector_selector.bmp" class="" title="range_queries和instant_vector_selector">
+
+</li>
+</ul>
+<h3 id="3-4-Range-queries-Range-vector-selectors"><a href="#3-4-Range-queries-Range-vector-selectors" class="headerlink" title="3.4. Range queries + Range vector selectors"></a>3.4. <code>Range queries</code> + <code>Range vector selectors</code></h3><ul>
+<li>查询区间为<code>[0, 90]s</code>,<code>step</code>参数为30s</li>
+<li>查询语句直接为<code>http_request[15s]</code><br>查询结果为<code>[1(0s)], [7(15s),9(30s)], [15(45s),17(60s)], [23(75s),30(90s)]</code>如下图所示。<code>Range vector selectors</code>的计算结果无法直接用于作图，需要使用函数对其进行计算才能进行图像绘制。例如使用<code>increase</code>函数，结果为<code>空, 2, 2, 7</code>，空是因为第一组数据只有一个数<code>increase</code>函数无法计算。<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/range_queries%E5%92%8Crange_vector_selector.bmp" class="" title="range_queries和range_vector_selector">
+
+</li>
+</ul>
+<h2 id="4-Grafana中的图像展示"><a href="#4-Grafana中的图像展示" class="headerlink" title="4. Grafana中的图像展示"></a>4. <code>Grafana</code>中的图像展示</h2><p>Grafana中Prometheus的参数如下所示，其中Interval 乘以 Resolution（显示精度）就是 Prometheus参数。</p>
+<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/Grafana%E4%B8%ADPrometheus%E5%8F%82%E6%95%B0.bmp" class="" title="Grafana中Prometheus参数">
+<p>ps: 可通过Query inspector查看具体的step</p>
+<h2 id="5-参考"><a href="#5-参考" class="headerlink" title="5. 参考"></a>5. 参考</h2><p><a href="https://prometheus.io/docs/introduction/overview/" target="_blank" rel="noopener">Prometheus官方文档</a><br><a href="https://grafana.com/docs/grafana/latest/" target="_blank" rel="noopener">Grafana文档</a><br><a href="https://segmentfault.com/a/1190000017553625" target="_blank" rel="noopener">详解Prometheus range query中的step参数</a></p>
+]]></content>
+      <categories>
+        <category>工具学习</category>
+      </categories>
+      <tags>
+        <tag>普罗米修斯</tag>
+        <tag>Grafana</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Barton-Nackman 技巧</title>
     <url>/2019/12/24/Barton-Nackman-%E6%8A%80%E5%B7%A7/</url>
     <content><![CDATA[<h3 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h3><p><code>Barton-Nackman</code>技巧是通过传递自己本身作为模板参数, 在模板中实现一些依赖于派生类的方法,从而减少了派生类的代码量</p>
@@ -21,12 +186,40 @@
       </tags>
   </entry>
   <entry>
+    <title>基于epoll和getaddrinfo_a的异步dns解析</title>
+    <url>/2021/08/15/%E5%9F%BA%E4%BA%8Eepoll%E5%92%8Cgetaddrinfo-a%E7%9A%84%E5%BC%82%E6%AD%A5dns%E8%A7%A3%E6%9E%90/</url>
+    <content><![CDATA[<h2 id="1-介绍"><a href="#1-介绍" class="headerlink" title="1.介绍"></a>1.介绍</h2><p>多线程程序往往代表了高性能、高并发。但是多线程程序也比较容易导致难以调试的bug。单线程程序逻辑简单，很容易编写bugfree的代码，所以单线程程序；多进程部署也是一个不错的方案。  </p>
+<ul>
+<li>单线程程序中我们需要尽量的避免堵塞操作，因为只有一个线程，堵塞之后整个进程都不工作，很多同步操作都需要进行异步实现。  </li>
+</ul>
+<p><code>gethostbyname</code>的作用为获取域名对应的ip地址，是一个同步操作，容易发生堵塞。本文就linux下基于<code>epoll</code>和<code>getaddrinfo_a</code>实现异步dns解析做一个简单介绍。</p>
+<a id="more"></a>
+
+<h2 id="2-实现"><a href="#2-实现" class="headerlink" title="2. 实现"></a>2. 实现</h2><h3 id="2-1-全局变量"><a href="#2-1-全局变量" class="headerlink" title="2.1 全局变量"></a>2.1 全局变量</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> perror_then_exit(err) perror(err); exit(1)</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span> hostname = <span class="string">"www.baidu.com"</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">int</span> g_epollfd = <span class="number">0</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">int</span> g_signalfd = <span class="number">0</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">gaicb</span>* <span class="title">g_gaicb</span> = <span class="title">NULL</span>;</span></span></pre></td></tr></table></figure>
+
+<h3 id="2-2-创建epoll和信号"><a href="#2-2-创建epoll和信号" class="headerlink" title="2.2 创建epoll和信号"></a>2.2 创建<code>epoll</code>和信号</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">create_epollfd</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="built_in">cout</span> &lt;&lt; __func__ &lt;&lt; <span class="built_in">endl</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    g_epollfd = epoll_create(<span class="number">10</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">if</span> (g_epollfd == <span class="number">-1</span>) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        perror_then_exit(<span class="string">"epoll_create"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">create_signalfd</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="built_in">cout</span> &lt;&lt; __func__ &lt;&lt; <span class="built_in">endl</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">sigset_t</span> sigs;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    sigemptyset(&amp;sigs);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">if</span> (sigaddset(&amp;sigs, SIGRTMIN) != <span class="number">0</span>) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        perror_then_exit(<span class="string">"sigaddset"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">if</span> (pthread_sigmask(SIG_BLOCK, &amp;sigs, <span class="literal">NULL</span>)) &#123; <span class="comment">// 屏蔽该信号是为了避免信号被默认处理，实时信号默认处理为结束进程。</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">        perror_then_exit(<span class="string">"pthread_sigmask"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    g_signalfd = signalfd(<span class="number">-1</span>, &amp;sigs, SFD_NONBLOCK | SFD_CLOEXEC);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">if</span> (g_signalfd == <span class="number">-1</span>) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        perror_then_exit(<span class="string">"signalfd"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">add_signalfd_to_epoll</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="built_in">cout</span> &lt;&lt; __func__ &lt;&lt; <span class="built_in">endl</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">epoll_event</span> <span class="title">event</span>;</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="built_in">memset</span>(&amp;event, <span class="number">0</span>, <span class="keyword">sizeof</span>(event));</span></pre></td></tr><tr><td class="code"><pre><span class="line">    event.events = EPOLLIN | EPOLLET;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    event.data.fd = g_signalfd;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">if</span> (epoll_ctl(g_epollfd, EPOLL_CTL_ADD, g_signalfd, &amp;event) &lt; <span class="number">0</span>) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        perror_then_exit(<span class="string">"epoll_ctl"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<h3 id="2-3-调用getaddrinfo-a发起dns解析"><a href="#2-3-调用getaddrinfo-a发起dns解析" class="headerlink" title="2.3 调用getaddrinfo_a发起dns解析"></a>2.3 调用<code>getaddrinfo_a</code>发起dns解析</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">raise_dns</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="built_in">cout</span> &lt;&lt; __func__ &lt;&lt; <span class="built_in">endl</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">if</span> (!g_gaicb) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        g_gaicb = (gaicb*)<span class="built_in">calloc</span>(<span class="number">1</span>, <span class="keyword">sizeof</span>(gaicb));</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">addrinfo</span>* <span class="title">hint</span> = (<span class="title">addrinfo</span>*)<span class="title">calloc</span>(1, <span class="title">sizeof</span>(<span class="title">struct</span> <span class="title">addrinfo</span>));</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    hint-&gt;ai_socktype = SOCK_STREAM;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    hint-&gt;ai_protocol = IPPROTO_TCP;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    hint-&gt;ai_family = AF_INET;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    hint-&gt;ai_flags = AI_V4MAPPED;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">sigevent</span> <span class="title">sev</span>;</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    sev.sigev_notify = SIGEV_SIGNAL; <span class="comment">// 解析成功之后通知方式设置为信号</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    sev.sigev_signo = SIGRTMIN;               </span></pre></td></tr><tr><td class="code"><pre><span class="line">    sev.sigev_value.sival_ptr = g_gaicb;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    g_gaicb-&gt;ar_name = hostname.c_str();</span></pre></td></tr><tr><td class="code"><pre><span class="line">    g_gaicb-&gt;ar_request = hint;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    </span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">if</span> (getaddrinfo_a(GAI_NOWAIT, &amp;g_gaicb, <span class="number">1</span>, &amp;sev)) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        perror_then_exit(<span class="string">"getaddrinfo_a"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<h3 id="2-4-调用epoll-wait等待dns解析结束。"><a href="#2-4-调用epoll-wait等待dns解析结束。" class="headerlink" title="2.4 调用epoll_wait等待dns解析结束。"></a>2.4 调用<code>epoll_wait</code>等待dns解析结束。</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">parse_dns</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="built_in">cout</span> &lt;&lt; __func__ &lt;&lt; <span class="built_in">endl</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">signalfd_siginfo</span> <span class="title">ssi</span>;</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">ssize_t</span> size = <span class="number">0</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    size = read(g_signalfd, &amp;ssi, <span class="keyword">sizeof</span>(ssi));</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">if</span> (size != <span class="keyword">sizeof</span>(ssi)) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        perror_then_exit(<span class="string">"read signal fd"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">gaicb</span>* <span class="title">gaicb</span> = (<span class="title">struct</span> <span class="title">gaicb</span> *)<span class="title">ssi</span>.<span class="title">ssi_ptr</span>;</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">addrinfo</span> *<span class="title">ai</span> = <span class="title">gaicb</span>-&gt;<span class="title">ar_result</span>;</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">char</span>  ip[<span class="number">20</span>] = &#123;<span class="number">0</span>&#125;;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    inet_ntop(AF_INET, &amp;(((struct sockaddr_in *)ai-&gt;ai_addr)-&gt;sin_addr), ip, <span class="keyword">sizeof</span>(ip));</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"hostname: "</span> &lt;&lt; hostname &lt;&lt; <span class="built_in">endl</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"ip: "</span> &lt;&lt; ip &lt;&lt; <span class="built_in">endl</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    freeaddrinfo(gaicb-&gt;ar_result);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="built_in">free</span>(gaicb);</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">wait_dns</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    epoll_event events[<span class="number">10</span>];</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"enter epoll_wait"</span> &lt;&lt; <span class="built_in">endl</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">int</span> num = epoll_wait(g_epollfd, events, <span class="number">10</span>, <span class="number">-1</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"epoll_wait return, active events num:"</span> &lt;&lt; num &lt;&lt; <span class="built_in">endl</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">if</span> (num &lt; <span class="number">0</span>) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        perror_then_exit(<span class="string">"epoll_wait"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">if</span> (num != <span class="number">1</span>) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="built_in">cout</span> &lt;&lt; <span class="string">"events num not equal 1, num="</span> &lt;&lt; num &lt;&lt; <span class="built_in">endl</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    parse_dns();</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<h3 id="2-5-调用顺序"><a href="#2-5-调用顺序" class="headerlink" title="2.5 调用顺序"></a>2.5 调用顺序</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span> <span class="params">()</span> </span>&#123;    </span></pre></td></tr><tr><td class="code"><pre><span class="line">    create_epollfd();</span></pre></td></tr><tr><td class="code"><pre><span class="line">    create_signalfd();</span></pre></td></tr><tr><td class="code"><pre><span class="line">    add_signalfd_to_epoll();</span></pre></td></tr><tr><td class="code"><pre><span class="line">    raise_dns();</span></pre></td></tr><tr><td class="code"><pre><span class="line">    wait_dns();</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+<p>最后结果为：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">create_epollfd</span></pre></td></tr><tr><td class="code"><pre><span class="line">create_signalfd</span></pre></td></tr><tr><td class="code"><pre><span class="line">add_signalfd_to_epoll</span></pre></td></tr><tr><td class="code"><pre><span class="line">raise_dns</span></pre></td></tr><tr><td class="code"><pre><span class="line">enter epoll_wait</span></pre></td></tr><tr><td class="code"><pre><span class="line">epoll_wait return, active events num:1</span></pre></td></tr><tr><td class="code"><pre><span class="line">parse_dns</span></pre></td></tr><tr><td class="code"><pre><span class="line">hostname: www.baidu.com</span></pre></td></tr><tr><td class="code"><pre><span class="line">ip: 183.232.231.174</span></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>网络编程</category>
+      </categories>
+      <tags>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>什么是内存屏障</title>
     <url>/2021/06/14/%E4%BB%80%E4%B9%88%E6%98%AF%E5%86%85%E5%AD%98%E5%B1%8F%E9%9A%9C/</url>
-    <content><![CDATA[<p>文章结构见目录  </p>
-<h3 id="1-什么是内存屏障？，为什么需要内存屏障？"><a href="#1-什么是内存屏障？，为什么需要内存屏障？" class="headerlink" title="1.什么是内存屏障？，为什么需要内存屏障？"></a>1.什么是内存屏障？，为什么需要内存屏障？</h3><p>首先，为了性能<strong>编译器和处理器都会对指令进行重排序</strong>。  </p>
+    <content><![CDATA[<h3 id="1-什么是内存屏障？，为什么需要内存屏障？"><a href="#1-什么是内存屏障？，为什么需要内存屏障？" class="headerlink" title="1.什么是内存屏障？，为什么需要内存屏障？"></a>1.什么是内存屏障？，为什么需要内存屏障？</h3><p>首先，为了性能<strong>编译器和处理器都会对指令进行重排序</strong>。  </p>
 <ul>
-<li>什么是内存屏障：<strong>内存屏障是一条指令，该指令可以对编译器（软件）和处理器（硬件）的指令重排做出一定的限制</strong>，比如，一条内存屏障指令可以禁止编译器和处理器将其后面的指令移到内存屏障指令之前。  <a id="more"></a>  </li>
+<li>什么是内存屏障：<strong>一条指令，该指令可以对编译器（软件）和处理器（硬件）的指令重排做出一定的限制</strong>，比如，一条内存屏障指令可以禁止编译器和处理器将其后面的指令移到内存屏障指令之前。  <a id="more"></a>  </li>
 <li>为什么需要内存屏障：<strong>编译器和处理器指令重排只能保证在单线程执行下逻辑正确，在多个线程同时读写多个变量的情况下，如果不对指令重排作出一定限制，代码的执行结果会根据指令重排后的顺序产生不同的结果</strong>。指令重排后的顺序每次执行时都可能不一样，显然我们希望我们的代码执行结果与代码顺序是逻辑一致的（可能不太准确），所以我们需要内存屏障。比如。</li>
 </ul>
 <figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span>  DRINK_TEA        0</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span>  PASS_CLASSROOM   1</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span>  LEAVE_CLASSROOM  2</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="built_in">std</span>::atomic&lt;<span class="keyword">int</span>&gt; teacher_state(DRINK_TEA);</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="built_in">std</span>::atomic&lt;<span class="keyword">int</span>&gt; cat_state(DRINK_TEA);</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="built_in">std</span>::atomic&lt;<span class="keyword">int</span>&gt; your_state;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="comment">// thread1                                                                   </span></span></pre></td></tr><tr><td class="code"><pre><span class="line">teacher_state.store(PASS_CLASSROOM, <span class="built_in">std</span>::memory_order_relaxed); <span class="comment">// A      </span></span></pre></td></tr><tr><td class="code"><pre><span class="line">cat_state.store(PASS_CLASSROOM, <span class="built_in">std</span>::memory_order_relaxed);  <span class="comment">// B</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="comment">// thread2</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (cat_state.load(<span class="built_in">std</span>::memory_order_relaxed) == PASS_CLASSROOM) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    your_state.store(LEAVE_CLASSROOM, <span class="built_in">std</span>::memory_order_relaxed);</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
@@ -72,40 +265,11 @@
 </ol>
 ]]></content>
       <categories>
-        <category>并发编程</category>
+        <category>C++语言</category>
       </categories>
       <tags>
         <tag>C++</tag>
         <tag>并发编程</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>基于epoll和getaddrinfo_a的异步dns解析</title>
-    <url>/2021/08/15/%E5%9F%BA%E4%BA%8Eepoll%E5%92%8Cgetaddrinfo-a%E7%9A%84%E5%BC%82%E6%AD%A5dns%E8%A7%A3%E6%9E%90/</url>
-    <content><![CDATA[<h2 id="1-介绍"><a href="#1-介绍" class="headerlink" title="1.介绍"></a>1.介绍</h2><p>多线程程序往往代表了高性能、高并发。但是多线程程序也比较容易导致难以调试的bug。单线程程序逻辑简单，很容易编写bugfree的代码，所以单线程程序；多进程部署也是一个不错的方案。  </p>
-<ul>
-<li>单线程程序中我们需要尽量的避免堵塞操作，因为只有一个线程，堵塞之后整个进程都不工作，很多同步操作都需要进行异步实现。  </li>
-</ul>
-<p><code>gethostbyname</code>的作用为获取域名对应的ip地址，是一个同步操作，容易发生堵塞。本文就linux下基于<code>epoll</code>和<code>getaddrinfo_a</code>实现异步dns解析做一个简单介绍。</p>
-<a id="more"></a>
-
-<h2 id="2-实现"><a href="#2-实现" class="headerlink" title="2. 实现"></a>2. 实现</h2><h3 id="2-1-全局变量"><a href="#2-1-全局变量" class="headerlink" title="2.1 全局变量"></a>2.1 全局变量</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> perror_then_exit(err) perror(err); exit(1)</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span> hostname = <span class="string">"www.baidu.com"</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">int</span> g_epollfd = <span class="number">0</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">int</span> g_signalfd = <span class="number">0</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">gaicb</span>* <span class="title">g_gaicb</span> = <span class="title">NULL</span>;</span></span></pre></td></tr></table></figure>
-
-<h3 id="2-2-创建epoll和信号"><a href="#2-2-创建epoll和信号" class="headerlink" title="2.2 创建epoll和信号"></a>2.2 创建<code>epoll</code>和信号</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">create_epollfd</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="built_in">cout</span> &lt;&lt; __func__ &lt;&lt; <span class="built_in">endl</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    g_epollfd = epoll_create(<span class="number">10</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">if</span> (g_epollfd == <span class="number">-1</span>) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        perror_then_exit(<span class="string">"epoll_create"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">create_signalfd</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="built_in">cout</span> &lt;&lt; __func__ &lt;&lt; <span class="built_in">endl</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">sigset_t</span> sigs;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    sigemptyset(&amp;sigs);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">if</span> (sigaddset(&amp;sigs, SIGRTMIN) != <span class="number">0</span>) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        perror_then_exit(<span class="string">"sigaddset"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">if</span> (pthread_sigmask(SIG_BLOCK, &amp;sigs, <span class="literal">NULL</span>)) &#123; <span class="comment">// 屏蔽该信号是为了避免信号被默认处理，实时信号默认处理为结束进程。</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">        perror_then_exit(<span class="string">"pthread_sigmask"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    g_signalfd = signalfd(<span class="number">-1</span>, &amp;sigs, SFD_NONBLOCK | SFD_CLOEXEC);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">if</span> (g_signalfd == <span class="number">-1</span>) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        perror_then_exit(<span class="string">"signalfd"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">add_signalfd_to_epoll</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="built_in">cout</span> &lt;&lt; __func__ &lt;&lt; <span class="built_in">endl</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">epoll_event</span> <span class="title">event</span>;</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="built_in">memset</span>(&amp;event, <span class="number">0</span>, <span class="keyword">sizeof</span>(event));</span></pre></td></tr><tr><td class="code"><pre><span class="line">    event.events = EPOLLIN | EPOLLET;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    event.data.fd = g_signalfd;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">if</span> (epoll_ctl(g_epollfd, EPOLL_CTL_ADD, g_signalfd, &amp;event) &lt; <span class="number">0</span>) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        perror_then_exit(<span class="string">"epoll_ctl"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
-
-<h3 id="2-3-调用getaddrinfo-a发起dns解析"><a href="#2-3-调用getaddrinfo-a发起dns解析" class="headerlink" title="2.3 调用getaddrinfo_a发起dns解析"></a>2.3 调用<code>getaddrinfo_a</code>发起dns解析</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">raise_dns</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="built_in">cout</span> &lt;&lt; __func__ &lt;&lt; <span class="built_in">endl</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">if</span> (!g_gaicb) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        g_gaicb = (gaicb*)<span class="built_in">calloc</span>(<span class="number">1</span>, <span class="keyword">sizeof</span>(gaicb));</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">addrinfo</span>* <span class="title">hint</span> = (<span class="title">addrinfo</span>*)<span class="title">calloc</span>(1, <span class="title">sizeof</span>(<span class="title">struct</span> <span class="title">addrinfo</span>));</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    hint-&gt;ai_socktype = SOCK_STREAM;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    hint-&gt;ai_protocol = IPPROTO_TCP;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    hint-&gt;ai_family = AF_INET;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    hint-&gt;ai_flags = AI_V4MAPPED;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">sigevent</span> <span class="title">sev</span>;</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    sev.sigev_notify = SIGEV_SIGNAL; <span class="comment">// 解析成功之后通知方式设置为信号</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    sev.sigev_signo = SIGRTMIN;               </span></pre></td></tr><tr><td class="code"><pre><span class="line">    sev.sigev_value.sival_ptr = g_gaicb;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    g_gaicb-&gt;ar_name = hostname.c_str();</span></pre></td></tr><tr><td class="code"><pre><span class="line">    g_gaicb-&gt;ar_request = hint;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    </span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">if</span> (getaddrinfo_a(GAI_NOWAIT, &amp;g_gaicb, <span class="number">1</span>, &amp;sev)) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        perror_then_exit(<span class="string">"getaddrinfo_a"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
-
-<h3 id="2-4-调用epoll-wait等待dns解析结束。"><a href="#2-4-调用epoll-wait等待dns解析结束。" class="headerlink" title="2.4 调用epoll_wait等待dns解析结束。"></a>2.4 调用<code>epoll_wait</code>等待dns解析结束。</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">parse_dns</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="built_in">cout</span> &lt;&lt; __func__ &lt;&lt; <span class="built_in">endl</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">signalfd_siginfo</span> <span class="title">ssi</span>;</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">ssize_t</span> size = <span class="number">0</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    size = read(g_signalfd, &amp;ssi, <span class="keyword">sizeof</span>(ssi));</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">if</span> (size != <span class="keyword">sizeof</span>(ssi)) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        perror_then_exit(<span class="string">"read signal fd"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">gaicb</span>* <span class="title">gaicb</span> = (<span class="title">struct</span> <span class="title">gaicb</span> *)<span class="title">ssi</span>.<span class="title">ssi_ptr</span>;</span></span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">addrinfo</span> *<span class="title">ai</span> = <span class="title">gaicb</span>-&gt;<span class="title">ar_result</span>;</span></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">char</span>  ip[<span class="number">20</span>] = &#123;<span class="number">0</span>&#125;;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    inet_ntop(AF_INET, &amp;(((struct sockaddr_in *)ai-&gt;ai_addr)-&gt;sin_addr), ip, <span class="keyword">sizeof</span>(ip));</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"hostname: "</span> &lt;&lt; hostname &lt;&lt; <span class="built_in">endl</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"ip: "</span> &lt;&lt; ip &lt;&lt; <span class="built_in">endl</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    freeaddrinfo(gaicb-&gt;ar_result);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="built_in">free</span>(gaicb);</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">wait_dns</span><span class="params">()</span> </span>&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    epoll_event events[<span class="number">10</span>];</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"enter epoll_wait"</span> &lt;&lt; <span class="built_in">endl</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">int</span> num = epoll_wait(g_epollfd, events, <span class="number">10</span>, <span class="number">-1</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"epoll_wait return, active events num:"</span> &lt;&lt; num &lt;&lt; <span class="built_in">endl</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">if</span> (num &lt; <span class="number">0</span>) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        perror_then_exit(<span class="string">"epoll_wait"</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">if</span> (num != <span class="number">1</span>) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="built_in">cout</span> &lt;&lt; <span class="string">"events num not equal 1, num="</span> &lt;&lt; num &lt;&lt; <span class="built_in">endl</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    parse_dns();</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
-
-<h3 id="2-5-调用顺序"><a href="#2-5-调用顺序" class="headerlink" title="2.5 调用顺序"></a>2.5 调用顺序</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span> <span class="params">()</span> </span>&#123;    </span></pre></td></tr><tr><td class="code"><pre><span class="line">    create_epollfd();</span></pre></td></tr><tr><td class="code"><pre><span class="line">    create_signalfd();</span></pre></td></tr><tr><td class="code"><pre><span class="line">    add_signalfd_to_epoll();</span></pre></td></tr><tr><td class="code"><pre><span class="line">    raise_dns();</span></pre></td></tr><tr><td class="code"><pre><span class="line">    wait_dns();</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
-<p>最后结果为：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">create_epollfd</span></pre></td></tr><tr><td class="code"><pre><span class="line">create_signalfd</span></pre></td></tr><tr><td class="code"><pre><span class="line">add_signalfd_to_epoll</span></pre></td></tr><tr><td class="code"><pre><span class="line">raise_dns</span></pre></td></tr><tr><td class="code"><pre><span class="line">enter epoll_wait</span></pre></td></tr><tr><td class="code"><pre><span class="line">epoll_wait return, active events num:1</span></pre></td></tr><tr><td class="code"><pre><span class="line">parse_dns</span></pre></td></tr><tr><td class="code"><pre><span class="line">hostname: www.baidu.com</span></pre></td></tr><tr><td class="code"><pre><span class="line">ip: 183.232.231.174</span></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>网络编程</category>
-      </categories>
-      <tags>
-        <tag>linux</tag>
       </tags>
   </entry>
   <entry>
@@ -183,140 +347,6 @@
       </categories>
       <tags>
         <tag>普罗米修斯</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>linux命令 awk</title>
-    <url>/2020/07/19/linux%E5%91%BD%E4%BB%A4-awk/</url>
-    <content><![CDATA[<h3 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h3><p><code>awk</code>是一个用于处理文本的强大工具,取名为三位创始人<code>Alfred Aho，Peter  Weinberger</code>, 和 <code>Brian Kernighan</code> 的 <code>Family Name</code>的首字符。</p>
-<a id="more"></a>
-<h3 id="2-基本语法"><a href="#2-基本语法" class="headerlink" title="2. 基本语法"></a>2. 基本语法</h3><p><code>akw [options] &#39;awk programa&#39; inputfile</code><br>或<br><code>akw [options] -f &#39;awk programa file&#39; inputfile</code>   </p>
-<p><code>awk programa</code>是指<code>awk</code>的命令,构成为<br><code>pattern {action}</code>,<code>pattern</code>是正则表达式使用<code>/</code>包裹起来,如<code>/regular-expression/</code>,然后以行为单位对满足条件的行执行<code>action</code>操作.</p>
-<h3 id="3-常用option"><a href="#3-常用option" class="headerlink" title="3. 常用option"></a>3. 常用<code>option</code></h3><p><code>-F</code>:指定文件的分隔符,默认为空格或者<code>tab</code> ;<code>awk</code>将文本的一行以分隔符分割成多个域<code>$0</code>指整行,<code>$1,$2...</code>分别指第二列,第三列等.  </p>
-<h3 id="4-例子"><a href="#4-例子" class="headerlink" title="4. 例子"></a>4. 例子</h3><p>假设文件<code>mail-list</code>内容为 ： </p>
-<pre><code>Amelia       555-5553     amelia.zodiacusque@gmail.com    F
-Broderick    555-0542     broderick.aliquotiens@yahoo.com R
-Julie        555-6699     julie.perscrutabor@skeeve.com   F
-Samuel       555-3430     samuel.lanceolis@shu.edu        A</code></pre><p><code>awk &#39;/Julie/ {print $1,$3}&#39; mail-list</code>命令就是匹配存在<code>Julie</code>的行,然后打印出该行的第一列和第三列,注意要在<code>$1</code>和<code>$1</code>之间添加逗号,不然第一列和第三列的打印结果会连在一起.</p>
-]]></content>
-      <categories>
-        <category>linux命令</category>
-      </categories>
-      <tags>
-        <tag>linux</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>brpc的bthread分析</title>
-    <url>/2020/09/20/brpc%E7%9A%84bthread%E5%88%86%E6%9E%90/</url>
-    <content><![CDATA[<h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h2><p>brpc是百度开源的一款rpc框架，因其高性能、扩展性强、在其基础上进行二次开发，可定制性强；国内许多公司有在使用该框架。brpc使用的是一个M:N的协程模型(bthread)，本文简单介绍一下这个模型。</p>
-<a id="more"></a>
-
-<h2 id="2-模型架构"><a href="#2-模型架构" class="headerlink" title="2. 模型架构"></a>2. 模型架构</h2><p>bthread的模型架构如下，M个bthread映射到N个pthread,pthread与内核线程的关系式1:1，bthread实际运行在pthread中，bthread运行一半之后可以放弃pthread资源，再次运行时可能处于不同的pthread.</p>
-<img src="/2020/09/20/brpc%E7%9A%84bthread%E5%88%86%E6%9E%90/bthread%E6%9E%B6%E6%9E%84.bmp" class="" title="bthread架构"> 
-
-<h2 id="3-bthread的简单使用"><a href="#3-bthread的简单使用" class="headerlink" title="3. bthread的简单使用"></a>3. bthread的简单使用</h2><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="keyword">bthread_t</span>&gt; tids;</span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; thread_num; ++i) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    <span class="keyword">if</span> (bthread_start_background(&amp;tids[i], <span class="literal">NULL</span>, myfunc, &amp;myarg) != <span class="number">0</span>) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        LOG(ERROR) &lt;&lt; <span class="string">"Fail to create bthread"</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span></pre></td></tr><tr><td class="code"><pre><span class="line">     &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; thread_num; ++i) &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">     bthread_join(tids[i], <span class="literal">NULL</span>);</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
-<ul>
-<li><code>bthread_start_background</code>相当于<code>pthread_create</code>,使用函数创建一个bthread.</li>
-<li><code>bthread_join</code>相当于<code>pthread_join</code>等待协程的结束.</li>
-</ul>
-<h2 id="4-bthread的原理"><a href="#4-bthread的原理" class="headerlink" title="4. bthread的原理"></a>4. bthread的原理</h2><p>bthread主要接口函数和一些实现类构成。比较重要的类有两个，<code>TaskControl</code>和<code>TaskGroup</code>在bthread中一个协程也称作一个task.<code>TaskControl</code>负责管理所有的pthread.<code>TaskGroup</code>负责每个pthread的工作。</p>
-<ol>
-<li><p>接口函数：<br><code>bthread_start_urgent</code>:创建一个协程，并立即执行该协程。<br><code>bthread_start_background</code>：创建一个协程，并将其加入调度队列。<br><code>bthread_yield</code>：放弃cpu的执行权，切换到另外的协程执行。</p>
-</li>
-<li><p><code>TaskControl</code>的主要接口<br><code>init</code>:bthread的初始化，其中会调用<code>pthread_create</code>创建工作线程。<br><code>create_group</code>：创建一个<code>TaskGroup</code>对象。<br><code>steal_task</code>：使bthread可以在不同的pthread中进行切换，提高并发度。<br><code>choose_one_group</code>：随机选择一个管理的<code>TaskGroup</code>对象返回。</p>
-</li>
-<li><p><code>TaskGroup</code>的主要接口<br><code>sched_to</code>：切换到某个协程去执行。<br><code>run_main_task</code>：工作线程执行的函数，主要工作为不停的选择不同的bthread并调度执行。</p>
-</li>
-</ol>
-<h2 id="5-函数时序图"><a href="#5-函数时序图" class="headerlink" title="5. 函数时序图"></a>5. 函数时序图</h2><p>本文时序图省略了部分函数，保留整体逻辑。</p>
-<h3 id="5-1-bthread-start-background时序图"><a href="#5-1-bthread-start-background时序图" class="headerlink" title="5.1. bthread_start_background时序图"></a>5.1. <code>bthread_start_background</code>时序图</h3><img src="/2020/09/20/brpc%E7%9A%84bthread%E5%88%86%E6%9E%90/bthread_start_background%E6%97%B6%E5%BA%8F%E5%9B%BE.bmp" class="" title="bthread_start_background时序图">
-<ol>
-<li><code>start_from_non_worker</code>：在不是worker的线程中调用该函数。</li>
-<li><code>TaskControl* c = get_or_new_task_control()</code>:获得<code>TaskControl</code>对象，如果不是第一次执行，就会执行<code>TaskControl::init</code>。</li>
-<li><code>TaskControl::init</code>:创建worker线程。</li>
-<li><code>TaskGroup* g = c-&gt;choose_one_group()</code>:随机选择一个<code>TaskGroup</code>。</li>
-<li><code>ready_to_run_remote</code>:将该bthread加入到worker线程的调度队列中。</li>
-</ol>
-<h3 id="5-2-run-main-task时序图"><a href="#5-2-run-main-task时序图" class="headerlink" title="5.2. run_main_task时序图"></a>5.2. <code>run_main_task</code>时序图</h3><img src="/2020/09/20/brpc%E7%9A%84bthread%E5%88%86%E6%9E%90/run_main_task%E6%97%B6%E5%BA%8F%E5%9B%BE.bmp" class="" title="run_main_task时序图">
-<ol>
-<li><code>wait_task(&amp;tid)</code>:调度一个可执行的bthread,可能会从其他worker偷取bthread。</li>
-<li><code>TaskGroup::sched_to(&amp;dummy, tid)</code>:调度指定bthread执行。</li>
-<li><code>jump_stack(cur_meta-&gt;stack, next_meta-&gt;stack);</code>:切换用户态的栈。</li>
-</ol>
-<h2 id="6-参考"><a href="#6-参考" class="headerlink" title="6. 参考"></a>6. 参考</h2><p><a href="https://cloud.tencent.com/developer/article/1609731" target="_blank" rel="noopener">brpc的bthread解读</a><br><a href="https://zhuanlan.zhihu.com/p/113427004" target="_blank" rel="noopener">高性能RPC框架BRPC核心机制分析&lt;一&gt;</a><br><a href="https://github.com/apache/incubator-brpc/tree/a2f294e99e48cfe62d542ed4f0bd22998c426afc" target="_blank" rel="noopener">apache/incubator-brpc</a></p>
-]]></content>
-      <categories>
-        <category>框架学习</category>
-      </categories>
-      <tags>
-        <tag>-brpc</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>从Prometheus的计算规则到Grafana的数据展示</title>
-    <url>/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/</url>
-    <content><![CDATA[<h2 id="1-前序"><a href="#1-前序" class="headerlink" title="1. 前序"></a>1. 前序</h2><p>本文目标为阐释清楚：<strong>一条<code>PromQL</code>在执行过程中发生了什么，从而得到<code>Grafana</code>中的图像</strong></p>
-<a id="more"></a>
-
-<h2 id="2-PromQL所操作的对象"><a href="#2-PromQL所操作的对象" class="headerlink" title="2. PromQL所操作的对象"></a>2. <code>PromQL</code>所操作的对象</h2><p>首先明确</p>
-<ol>
-<li><code>PromQL</code>计算依赖于收集数据的<code>timestamp</code></li>
-<li>收集数据的<code>timestamp</code>是<code>Prometheus server</code>发出<code>GET</code>请求时的时间戳</li>
-<li><code>Prometheus server</code>发出<code>GET</code>请求的时间并不严格符合数据的收集间隔</li>
-</ol>
-<p>ps: <code>timestamp</code>函数可以查看收集上来数据的时间戳<br>接下来对上述第3点做简单解释。</p>
-<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/Prometheus%E7%9A%84GET%E8%AF%B7%E6%B1%82%E6%97%B6%E9%97%B4.jpg" class="" title="Prometheus的GET请求时间">
-
-<p>如上图所示，蓝色的点为按照我们设置的数据收集间隔，<code>GET</code>请求的理论时间，理论时间间隔严格等于设置的收集时间间隔。然而实际上当<code>Prometheus server</code>负载较大时，实际发出<code>GET</code>请求的时间相对于理论时间可能有一定的延迟，如<code>a)</code>所示; 当<code>Prometheus server</code>同时向多个<code>Instance</code>收集数据时，<code>Prometheus server</code>甚至可能将多个<code>GET</code>请求离散分布到收集数据的时间间隔中，如<code>b)</code>所示。</p>
-<h2 id="3-Instant-Range-queries和Instant-Range-vector-selectors"><a href="#3-Instant-Range-queries和Instant-Range-vector-selectors" class="headerlink" title="3. Instant/Range queries和Instant/Range vector selectors"></a>3. <code>Instant/Range queries</code>和<code>Instant/Range vector selectors</code></h2><p><a href="https://prometheus.io/docs/prometheus/latest/querying/basics/" target="_blank" rel="noopener">Instant/Range vector selectors</a>是两种查询语句。</p>
-<ul>
-<li><code>Instant vector selectors</code>：在给定时间处从时间序列中选择出一个样本点</li>
-<li><code>Range vector selectors</code>：从时间序列中选出<code>timestamp</code>在区间<code>[给定时间 - range duration, 给定时间]</code>的样本点</li>
-</ul>
-<p><a href="https://prometheus.io/docs/prometheus/latest/querying/api/" target="_blank" rel="noopener">Instant/Range queries</a>是查询时间的范围的区别。</p>
-<ul>
-<li><code>Instant queries</code>：对某一个时间点进行查询。</li>
-<li><code>Range queries</code>：对某一段时间区间进行查询。<code>step</code>参数是指将查询区间按照<code>step</code>大小的间隔划分得到多个时间点，在这些时间点上使用<code>Instant/Range vector selectors</code>。可以这样理解，<code>Range queries</code>通过<code>step</code>参数转化为了多个<code>Instant queries</code>。假设查询区间为<code>[0, 90]s</code>,<code>step</code>参数为30s,那么该查询就变成了在<code>0s, 30s, 60s, 90s</code>的四次查询。在Grafana中显示横坐标就是时间，纵坐标就是值。Grafana显示变化趋势的图像一定是<code>Range queries</code>。</li>
-</ul>
-<p>假设一个<code>counter</code>类型的统计数据，名字为<code>http_request</code>,它的统计结果如下图所示：</p>
-<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/http_request%E5%81%87%E8%AE%BE%E6%95%B0%E6%8D%AE.bmp" class="" title="http_request假设数据">
-
-<h3 id="3-1-Instant-queries-Instant-vector-selectors"><a href="#3-1-Instant-queries-Instant-vector-selectors" class="headerlink" title="3.1. Instant queries + Instant vector selectors"></a>3.1. <code>Instant queries</code> + <code>Instant vector selectors</code></h3><ul>
-<li>假定查询时间为<code>50s</code></li>
-<li>查询语句直接为<code>http_request</code><br>查询结果为15，如下图所示。<code>Instant vector selectors</code>的查询规则为<strong>向后搜索到第一个时间戳小于等下查询时间的样本点；若搜索距离超过5分钟仍然无样本点，则查询结果为空</strong>。<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/instant_queries%E5%92%8Cinstant_vector_selector.bmp" class="" title="instant_queries和instant_vector_selector">
-
-</li>
-</ul>
-<h3 id="3-2-Instant-queries-Range-vector-selectors"><a href="#3-2-Instant-queries-Range-vector-selectors" class="headerlink" title="3.2. Instant queries + Range vector selectors"></a>3.2. <code>Instant queries</code> + <code>Range vector selectors</code></h3><ul>
-<li>假定查询时间为65s</li>
-<li>查询语句为<code>http_request[1m]</code><br>查询结果为<code>7(15s), 9(30s), 15(45s), 17(60s)</code>。我们可以使用一些函数作用于这些查询结果,例如<code>increase</code>函数，结果为10。表明查询时间处的<code>qpm</code>为10。示意图如下</li>
-</ul>
-<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/instant_queries%E5%92%8Crange_vector_selector.bmp" class="" title="instant_queries和range_vector_selector">
-
-<h3 id="3-3-Range-queries-Instant-vector-selectors"><a href="#3-3-Range-queries-Instant-vector-selectors" class="headerlink" title="3.3. Range queries + Instant vector selectors"></a>3.3. <code>Range queries</code> + <code>Instant vector selectors</code></h3><ul>
-<li>查询区间为<code>[0, 90]s</code>,<code>step</code>参数为30s</li>
-<li>查询语句直接为<code>http_request</code><br>查询结果为<code>1(0s), 9(30s), 17(60s), 30(90s)</code>。如下图所示<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/range_queries%E5%92%8Cinstant_vector_selector.bmp" class="" title="range_queries和instant_vector_selector">
-
-</li>
-</ul>
-<h3 id="3-4-Range-queries-Range-vector-selectors"><a href="#3-4-Range-queries-Range-vector-selectors" class="headerlink" title="3.4. Range queries + Range vector selectors"></a>3.4. <code>Range queries</code> + <code>Range vector selectors</code></h3><ul>
-<li>查询区间为<code>[0, 90]s</code>,<code>step</code>参数为30s</li>
-<li>查询语句直接为<code>http_request[15s]</code><br>查询结果为<code>[1(0s)], [7(15s),9(30s)], [15(45s),17(60s)], [23(75s),30(90s)]</code>如下图所示。<code>Range vector selectors</code>的计算结果无法直接用于作图，需要使用函数对其进行计算才能进行图像绘制。例如使用<code>increase</code>函数，结果为<code>空, 2, 2, 7</code>，空是因为第一组数据只有一个数<code>increase</code>函数无法计算。<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/range_queries%E5%92%8Crange_vector_selector.bmp" class="" title="range_queries和range_vector_selector">
-
-</li>
-</ul>
-<h2 id="4-Grafana中的图像展示"><a href="#4-Grafana中的图像展示" class="headerlink" title="4. Grafana中的图像展示"></a>4. <code>Grafana</code>中的图像展示</h2><p>Grafana中Prometheus的参数如下所示，其中Interval 乘以 Resolution（显示精度）就是 Prometheus参数。</p>
-<img src="/2020/08/16/%E4%BB%8EPrometheus%E7%9A%84%E8%AE%A1%E7%AE%97%E8%A7%84%E5%88%99%E5%88%B0Grafana%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B1%95%E7%A4%BA/Grafana%E4%B8%ADPrometheus%E5%8F%82%E6%95%B0.bmp" class="" title="Grafana中Prometheus参数">
-<p>ps: 可通过Query inspector查看具体的step</p>
-<h2 id="5-参考"><a href="#5-参考" class="headerlink" title="5. 参考"></a>5. 参考</h2><p><a href="https://prometheus.io/docs/introduction/overview/" target="_blank" rel="noopener">Prometheus官方文档</a><br><a href="https://grafana.com/docs/grafana/latest/" target="_blank" rel="noopener">Grafana文档</a><br><a href="https://segmentfault.com/a/1190000017553625" target="_blank" rel="noopener">详解Prometheus range query中的step参数</a></p>
-]]></content>
-      <categories>
-        <category>工具学习</category>
-      </categories>
-      <tags>
-        <tag>普罗米修斯</tag>
-        <tag>Grafana</tag>
       </tags>
   </entry>
 </search>
